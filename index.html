@@ -128,8 +128,8 @@ function openPeople(){document.getElementById("peoplePopup").style.display="bloc
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
 function uploadAvatar(){
-  if(!username){alert("Login first!");return;}
-  const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>profilePic.src=URL.createObjectURL(e.target.files[0]);f.click();
+  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
 }
 
 function login(){
@@ -142,18 +142,17 @@ function login(){
   localStorage.setItem("password", p);
   localStorage.setItem("age", a);
   closePopups();
+  // No chat message for login
 }
 
 function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
+
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
 /* AI Response with real image generation */
 async function aiResponse(text){
   let t = text.toLowerCase();
-  // math: x=*, ÷=/
-  let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
-  if(/^[0-9+\-*/().\s]+$/.test(mathText)){try{return String(Function("return "+mathText)());}catch{}}
-  
+  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
 
@@ -168,11 +167,17 @@ async function aiResponse(text){
         body: JSON.stringify({prompt: subject})
       });
       const data = await res.json();
-      if(data?.data?.[0]?.url) return {type:"image", src: data.data[0].url};
-      return "⚠️ Could not generate image.";
-    } catch{return "⚠️ Error contacting AI server.";}
+      if(data?.data?.[0]?.url){
+        return {type:"image", src: data.data[0].url};
+      } else {
+        return "⚠️ Could not generate image.";
+      }
+    } catch(e){
+      return "⚠️ Error contacting AI server.";
+    }
   }
 
+  if(/^[0-9+\-*/().\s]+$/.test(text)){try{return String(Function("return "+text)());}catch{}}
   if(t==="hi"||t==="hello") return "Hey";
   return "Got it.";
 }
@@ -185,8 +190,15 @@ async function send(){
   const typing = showTyping();
   const reply = await aiResponse(text);
   typing.remove();
-  addMessage(reply,"ai");
-  if(voiceEnabled && typeof reply==="string"){speechSynthesis.speak(new SpeechSynthesisUtterance(reply));}
+  if(reply && typeof reply === "object" && reply.type === "image"){
+    addMessage(reply,"ai");
+  } else {
+    addMessage(reply,"ai");
+    if(voiceEnabled && typeof reply==="string"){
+      let u=new SpeechSynthesisUtterance(reply);
+      speechSynthesis.speak(u);
+    }
+  }
 }
 
 input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
