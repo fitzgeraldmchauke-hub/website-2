@@ -28,17 +28,6 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 #profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto;}
 #motherBtn {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:red; display:none; cursor:pointer; z-index:200;}
 #profileRing {border:5px solid gold; border-radius:50%; display:none; width:80px; height:80px; position:absolute; top:8px; left:8px;}
-
-/* Avatar disintegration animation */
-@keyframes disintegrate {
-  0% {opacity:1; transform:scale(1) rotate(0deg);}
-  30% {opacity:0.8; transform:scale(1.05) rotate(5deg);}
-  60% {opacity:0.4; transform:scale(0.9) rotate(-10deg);}
-  100% {opacity:0; transform:scale(0.5) rotate(20deg);}
-}
-.disintegrate {
-  animation: disintegrate 2s forwards;
-}
 </style>
 </head>
 <body>
@@ -138,37 +127,9 @@ function openShare(){navigator.clipboard.writeText(location.href);document.getEl
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
-
 function uploadAvatar(){
-  if(!username){
-    alert("Login first!"); 
-    profilePic.style.display="block";
-    const f = document.createElement("input");
-    f.type = "file";
-    f.accept = "image/*";
-    f.onchange = e => {
-      const file = e.target.files[0];
-      profilePic.src = URL.createObjectURL(file);
-      // Trigger disintegration after 1 second
-      setTimeout(() => {
-        profilePic.classList.add("disintegrate");
-        setTimeout(() => {
-          profilePic.src = "";
-          profilePic.classList.remove("disintegrate");
-        }, 2000); // matches animation duration
-      }, 1000);
-    };
-    f.click();
-  } else {
-    const f=document.createElement("input");
-    f.type="file";
-    f.accept="image/*";
-    f.onchange=e=>{
-      const file=e.target.files[0];
-      profilePic.src=URL.createObjectURL(file);
-    };
-    f.click();
-  }
+  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
 }
 
 function login(){
@@ -187,19 +148,29 @@ function logout(){username="";password="";age=0;localStorage.removeItem("usernam
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
-/* AI + Math + Image */
+/* AI + Smart Math + Image + Big Numbers */
 async function aiResponse(text){
   let t = text.toLowerCase().trim();
 
-  // Convert "x" and "÷" for math
+  // Replace x and ÷ for math
   let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
+
+  // Evaluate math if valid
   if(/^[0-9+\-*/().\s]+$/.test(mathText)){
-    try{return String(Function("return "+mathText)());}catch{}
+    try {
+      // Handle huge numbers
+      if(/^\d+$/.test(mathText.replace(/\s+/g,''))){
+        return BigInt(eval(mathText)).toString();
+      }
+      return eval(mathText).toString();
+    } catch(e){ return "⚠️ Invalid math expression"; }
   }
 
+  // Slang
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
 
+  // Image
   let imgWords=["draw","create","image","picture","make"];
   if(imgWords.some(w=>t.includes(w))){
     let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
@@ -227,25 +198,22 @@ async function send(){
   input.value = "";
   addMessage(text, "user");
   const typing = showTyping();
-
-  // Thinking delay (3 seconds)
-  setTimeout(async () => {
-    const reply = await aiResponse(text);
-    typing.remove();
-    if(reply && typeof reply === "object" && reply.type === "image"){
-      addMessage(reply,"ai");
-    } else {
-      addMessage(reply,"ai");
-      if(voiceEnabled && typeof reply==="string"){
-        let u=new SpeechSynthesisUtterance(reply);
-        speechSynthesis.speak(u);
-      }
+  const reply = await aiResponse(text);
+  typing.remove();
+  if(reply && typeof reply === "object" && reply.type === "image"){
+    addMessage(reply,"ai");
+  } else {
+    addMessage(reply,"ai");
+    if(voiceEnabled && typeof reply==="string"){
+      let u=new SpeechSynthesisUtterance(reply);
+      speechSynthesis.speak(u);
     }
-  }, 3000);
+  }
 }
 
 input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
 
+/* Voice input */
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
   rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
