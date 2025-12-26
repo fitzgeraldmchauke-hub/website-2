@@ -33,58 +33,179 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 <body>
 
 <div id="sidebar">
-  <h2>four.gb</h2>
-  <img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
-  <div id="profileRing"></div>
-  <button id="chatBtn" class="active" onclick="showChat()">💬 Chat</button>
-  <button id="imgBtn" onclick="showImages()">🖼️ Images</button>
-  <button onclick="clearChat()">🧹 Clear</button>
-  <button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
-  <button onclick="openProfile()">👤 Profile</button>
+<h2>four.gb</h2>
+<img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
+<div id="profileRing"></div>
+<button id="chatBtn" class="active" onclick="showChat()">💬 Chat</button>
+<button id="imgBtn" onclick="showImages()">🖼️ Images</button>
+<button onclick="clearChat()">🧹 Clear</button>
+<button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
+<button onclick="openProfile()">👤 Profile</button>
 </div>
 
 <div id="main">
 
-  <!-- ✅ TOP BAR FULLY RESTORED -->
-  <div id="topbar">
-    <button onclick="openShare()">🔗 Share</button>
-    <button onclick="openPeople()">👥 Add</button>
-    <button onclick="startVoice()">🎤 Talk</button>
-  </div>
+<div id="topbar">
+<button onclick="openShare()">🔗 Share</button>
+<button onclick="openPeople()">👥 Add</button>
+<button onclick="startVoice()">🎤 Talk</button>
+</div>
 
-  <div id="messages"></div>
+<div id="messages"></div>
 
-  <div id="input-area">
-    <input id="input" placeholder="Ask anything…" />
-    <button id="send" onclick="send()">➤</button>
-  </div>
+<div id="input-area">
+<input id="input" placeholder="Ask anything…" />
+<button id="send" onclick="send()">➤</button>
+</div>
 </div>
 
 <div id="sharePopup" class="popup">
-  <div>Link copied!</div>
-  <button onclick="closePopups()">OK</button>
+<div>Link copied!</div>
+<button onclick="closePopups()">OK</button>
 </div>
 
 <div id="peoplePopup" class="popup">
-  <div>Add people coming soon</div>
-  <button onclick="closePopups()">Close</button>
+<div>Add people coming soon</div>
+<button onclick="closePopups()">Close</button>
 </div>
 
 <div id="profilePopup" class="popup">
-  <div>Profile Info</div>
-  <input id="usernameInput" placeholder="Username" />
-  <input id="passwordInput" type="password" placeholder="Password" />
-  <input id="ageInput" type="number" placeholder="Age 10-100" />
-  <button onclick="login()">Login / Set</button>
-  <button onclick="logout()">Logout</button>
-  <button onclick="closePopups()">Close</button>
+<div>Profile Info</div>
+<input id="usernameInput" placeholder="Username" />
+<input id="passwordInput" type="password" placeholder="Password" />
+<input id="ageInput" type="number" placeholder="Age 10-100" />
+<button onclick="login()">Login / Set</button>
+<button onclick="logout()">Logout</button>
+<button onclick="closePopups()">Close</button>
 </div>
 
 <div id="motherBtn" onclick="clickMother()">Mother</div>
 
-<!-- 🔽 SCRIPT IS UNCHANGED FROM PREVIOUS FIX 🔽 -->
 <script>
-/* your JS stays exactly the same as last message */
+let messages = document.getElementById("messages");
+let input = document.getElementById("input");
+let chatBtn = document.getElementById("chatBtn");
+let imgBtn = document.getElementById("imgBtn");
+let motherBtn = document.getElementById("motherBtn");
+let profilePic = document.getElementById("profilePic");
+let profileRing = document.getElementById("profileRing");
+let voiceBtn = document.getElementById("voiceBtn");
+
+let voiceEnabled = true;
+let clickCount = 0;
+let username = localStorage.getItem("username")||"";
+let password = localStorage.getItem("password")||"";
+let age = parseInt(localStorage.getItem("age"))||0;
+let imageHistory = [];
+
+function addMessage(content, who) {
+  const div = document.createElement("div");
+  div.className = "msg "+who;
+
+  if(content && typeof content==="object" && content.type==="image"){
+    const img=document.createElement("img");
+    img.src=content.src;
+    div.appendChild(img);
+    imageHistory.push(content.src);
+  } else {
+    div.textContent=content;
+  }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function showTyping() {
+  const d=document.createElement("div");
+  d.className="msg ai typing";
+  d.textContent="...";
+  messages.appendChild(d);
+  return d;
+}
+
+function clearChat(){messages.innerHTML="";}
+function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
+function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
+function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
+function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
+function openPeople(){document.getElementById("peoplePopup").style.display="block";}
+function openProfile(){document.getElementById("profilePopup").style.display="block";}
+function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
+
+function uploadAvatar(){
+  if(!username){ alert("Login first!"); return; }
+  const f=document.createElement("input");
+  f.type="file";
+  f.accept="image/*";
+  f.onchange=e=>profilePic.src=URL.createObjectURL(e.target.files[0]);
+  f.click();
+}
+
+function login(){
+  let u=usernameInput.value.trim();
+  let p=passwordInput.value.trim();
+  let a=parseInt(ageInput.value);
+  if(a<10||a>100){alert("Age must be 10-100");return;}
+  username=u;password=p;age=a;
+  localStorage.setItem("username",u);
+  localStorage.setItem("password",p);
+  localStorage.setItem("age",a);
+  closePopups();
+}
+
+function logout(){username="";password="";age=0; localStorage.clear();}
+function clickMother(){clickCount++; if(clickCount>=100){profileRing.style.display="block"; alert("Decorative ring unlocked!"); clickCount=0;}}
+
+/* AI + MATH + IMAGE */
+async function aiResponse(text){
+  let t=text.toLowerCase().trim();
+
+  // math: x=*, ÷=/
+  let mathText = t
+    .replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2")
+    .replace(/÷/g,"/");
+
+  if(/^[0-9+\-*/().\s]+$/.test(mathText)){
+    try{return String(Function("return "+mathText)());}catch{}
+  }
+
+  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
+  if(slang[t]) return slang[t];
+
+  let imgWords=["draw","create","image","picture","make"];
+  if(imgWords.some(w=>t.includes(w))){
+    let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
+    try{
+      const res = await fetch('http://localhost:3000/generate-image',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({prompt: subject})
+      });
+      const data = await res.json();
+      const url = data?.data?.[0]?.url || data?.url;
+      if(url) return {type:"image", src:url};
+      return "⚠️ No image returned";
+    }catch{ return "⚠️ Image server offline"; }
+  }
+
+  if(t==="hi"||t==="hello") return "Hey";
+  return "Got it.";
+}
+
+async function send(){
+  const text=input.value.trim();
+  if(!text) return;
+  input.value="";
+  addMessage(text,"user");
+  const typing=showTyping();
+  const reply=await aiResponse(text);
+  typing.remove();
+  addMessage(reply,"ai");
+  if(voiceEnabled && typeof reply==="string"){ speechSynthesis.speak(new SpeechSynthesisUtterance(reply)); }
+}
+
+input.addEventListener("keydown",e=>{if(e.key==="Enter")send();});
+function startVoice(){const rec=new (window.SpeechRecognition||webkitSpeechRecognition)(); rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}; rec.start();}
 </script>
 
 </body>
