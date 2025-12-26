@@ -32,6 +32,7 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </head>
 <body>
 
+<!-- Sidebar Buttons Placement preserved exactly -->
 <div id="sidebar">
 <h2>four.gb</h2>
 <img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
@@ -44,6 +45,7 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </div>
 
 <div id="main">
+<!-- Topbar Buttons Placement preserved -->
 <div id="topbar">
 <button onclick="openShare()">🔗 Share</button>
 <button onclick="openPeople()">👥 Add</button>
@@ -58,6 +60,7 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </div>
 </div>
 
+<!-- Popups Placement preserved -->
 <div id="sharePopup" class="popup">
 <div>Link copied!</div>
 <button onclick="closePopups()">OK</button>
@@ -134,11 +137,9 @@ function uploadAvatar(){
   f.onchange = e => {
     const file = e.target.files[0];
     if(!file) return;
-
     const reader = new FileReader();
     reader.onload = () => {
       profilePic.src = reader.result;
-
       if(isLoggedIn()){
         localStorage.setItem("avatar", reader.result);
       } else {
@@ -148,7 +149,6 @@ function uploadAvatar(){
           profilePic.style.opacity = "0";
           profilePic.style.transform = "scale(0.3) rotate(25deg)";
         }, 1200);
-
         setTimeout(() => {
           profilePic.src = "";
           profilePic.style.transition = "";
@@ -182,19 +182,16 @@ function login(){
   closePopups();
 }
 
-function logout(){username="";password="";age=0; localStorage.removeItem("username"); localStorage.removeItem("password"); localStorage.removeItem("age"); localStorage.removeItem("avatar");}
+function logout(){username="";password="";age=0; localStorage.removeItem("username"); localStorage.removeItem("password");localStorage.removeItem("age");localStorage.removeItem("avatar");}
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
 /* AI + Math + Big Numbers + Delay */
 async function aiResponse(text){
   let t = text.toLowerCase().trim();
-  // x=*, ÷=/
   t = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
-  
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
-
   let imgWords=["draw","create","image","picture","make"];
   if(imgWords.some(w=>t.includes(w))){
     let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
@@ -211,22 +208,16 @@ async function aiResponse(text){
     }catch{ return "⚠️ Image server offline"; }
   }
 
-  // Smart math with big numbers, 3-5 sec delay
   if(/^[0-9+\-*/().\s]+$/.test(t)){
     return new Promise(resolve => {
       setTimeout(() => {
-        try{
-          resolve(String(Function("return "+t)()));
-        }catch{ resolve("⚠️ Calculation error"); }
+        try{ resolve(String(Function("return "+t)())); }
+        catch{ resolve("⚠️ Calculation error"); }
       }, 3500);
     });
   }
 
-  if(t==="hi"||t==="hello"){
-    return new Promise(resolve => setTimeout(()=>resolve("Hey"), 2500));
-  }
-
-  // Unknown
+  if(t==="hi"||t==="hello") return new Promise(resolve => setTimeout(()=>resolve("Hey"), 2500));
   return new Promise(resolve => setTimeout(()=>resolve("Unidentified."), 3500));
 }
 
