@@ -1,1 +1,25 @@
-my site
+function send(){
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = "";
+  addMessage(text, "user");
+  const typing = showTyping();
+
+  setTimeout(() => {
+    typing.remove();
+    const reply = aiResponse(text);
+
+    // Handle images
+    if(reply && typeof reply === "object" && reply.type === "image"){
+      addMessage(reply, "ai");
+    } else {
+      addMessage(reply, "ai");
+      // Voice only for text
+      if(voiceEnabled && typeof reply === "string"){
+        let u = new SpeechSynthesisUtterance(reply);
+        speechSynthesis.speak(u);
+      }
+    }
+  }, 1000);
+}
+
