@@ -95,7 +95,21 @@ let password = localStorage.getItem("password")||"";
 let age = parseInt(localStorage.getItem("age"))||0;
 let imageHistory = [];
 
-function addMessage(content, who) {
+// Load saved avatar
+const savedAvatar = localStorage.getItem("avatarSrc");
+if(savedAvatar) profilePic.src = savedAvatar;
+
+// Load chat history
+function loadChat(){
+  const chatData = JSON.parse(localStorage.getItem("chatHistory")||"[]");
+  chatData.forEach(msg=>{
+    if(msg.type==="image") addMessage({type:"image",src:msg.src}, msg.who);
+    else addMessage(msg.text, msg.who);
+  });
+}
+
+// Add message with persistence
+function addMessage(content, who){
   const div = document.createElement("div");
   div.className = "msg "+who;
   if(content && typeof content==="object" && content.type==="image"){
@@ -106,9 +120,22 @@ function addMessage(content, who) {
   } else div.textContent=content;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+  saveChat();
 }
 
-function showTyping() {
+function saveChat(){
+  const chatData = [];
+  document.querySelectorAll("#messages .msg").forEach(msg=>{
+    if(msg.querySelector("img")){
+      chatData.push({type:"image", src: msg.querySelector("img").src, who: msg.classList.contains("user")?"user":"ai"});
+    } else {
+      chatData.push({type:"text", text: msg.textContent, who: msg.classList.contains("user")?"user":"ai"});
+    }
+  });
+  localStorage.setItem("chatHistory", JSON.stringify(chatData));
+}
+
+function showTyping(){
   const d=document.createElement("div");
   d.className="msg ai typing";
   d.textContent="...";
@@ -116,65 +143,79 @@ function showTyping() {
   return d;
 }
 
-function clearChat(){messages.innerHTML="";}
+function clearChat(){messages.innerHTML=""; saveChat();}
 function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
 function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function toggleVoice(){
-  voiceEnabled = !voiceEnabled;
-  voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;
-}
+function toggleVoice(){voiceEnabled=!voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
 function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
+
 function uploadAvatar(){
-  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
-  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
+  const f=document.createElement("input");
+  f.type="file"; f.accept="image/*";
+  f.onchange=e=>{
+    const file=e.target.files[0];
+    profilePic.src = URL.createObjectURL(file);
+    localStorage.setItem("avatarSrc", profilePic.src);
+
+    if(!username){
+      // Thanos-style disintegration
+      setTimeout(() => {
+        profilePic.style.transition = "all 1.5s ease-in-out";
+        profilePic.style.transform = "scale(0) rotate(360deg)";
+        profilePic.style.opacity = "0";
+      }, 2000);
+      setTimeout(() => {
+        profilePic.src = "";
+        profilePic.style.transition = "";
+        profilePic.style.transform = "";
+        profilePic.style.opacity = "1";
+        localStorage.removeItem("avatarSrc");
+      }, 4000);
+    }
+  };
+  f.click();
 }
 
 function login(){
-  let u = document.getElementById("usernameInput").value.trim();
-  let p = document.getElementById("passwordInput").value.trim();
-  let a = parseInt(document.getElementById("ageInput").value);
-  if(a<10||a>100){ alert("Age must be 10-100"); return; }
-  username = u; password = p; age = a;
-  localStorage.setItem("username", u);
-  localStorage.setItem("password", p);
-  localStorage.setItem("age", a);
+  username = usernameInput.value.trim();
+  password = passwordInput.value.trim();
+  age = parseInt(ageInput.value);
+  if(age<10||age>100){alert("Age must be 10-100"); return;}
+  localStorage.setItem("username", username);
+  localStorage.setItem("password", password);
+  localStorage.setItem("age", age);
   closePopups();
 }
 
-function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
+function logout(){
+  username=""; password=""; age=0;
+  localStorage.removeItem("username");
+  localStorage.removeItem("password");
+  localStorage.removeItem("age");
+}
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
-/* AI + Smart Math + Big Numbers + Thinking Delay */
+/* AI + math + image + big numbers */
 async function aiResponse(text){
-  let t = text.toLowerCase().trim();
-  
-  // Replace x and ÷
-  let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
-
-  // If it's math
-  if(/^[0-9+\-*/().\s]+$/.test(mathText)){
-    try {
-      await new Promise(r=>setTimeout(r, 5000)); // 5s delay for math
-      if(/^\d+$/.test(mathText.replace(/\s+/g,''))){
-        return BigInt(eval(mathText)).toString();
-      }
-      return eval(mathText).toString();
-    } catch(e){ return "⚠️ Invalid math expression"; }
+  const t = text.toLowerCase().replace(/x/gi,"*").replace(/÷/g,"/");
+  // Check math
+  if(/^[0-9+\-*/().\s]+$/.test(t)){
+    return new Promise(resolve=>setTimeout(()=>{
+      try{resolve(String(Function("return "+t)()));}catch{resolve("⚠️ Invalid math");}
+    }, 5000)); // 5s thinking
   }
-
   // Slang
-  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
-  if(slang[t]) { await new Promise(r=>setTimeout(r, 3000)); return slang[t]; }
+  const slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
+  if(slang[t]) return slang[t];
 
-  // Image
-  let imgWords=["draw","create","image","picture","make"];
+  // Images
+  const imgWords=["draw","create","image","picture","make"];
   if(imgWords.some(w=>t.includes(w))){
-    await new Promise(r=>setTimeout(r, 4000)); // thinking delay
-    let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
+    const subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
     try{
       const res = await fetch('http://localhost:3000/generate-image',{
         method:'POST',
@@ -185,40 +226,37 @@ async function aiResponse(text){
       const url = data?.data?.[0]?.url || data?.url;
       if(url) return {type:"image", src:url};
       return "⚠️ No image returned";
-    }catch{ return "⚠️ Image server offline"; }
+    }catch{return "⚠️ Image server offline";}
   }
 
-  await new Promise(r=>setTimeout(r, 3000)); // default thinking delay
-  if(t==="hi"||t==="hello") return "Hey";
-  return "Got it.";
+  if(t==="hi"||t==="hello") return new Promise(resolve=>setTimeout(()=>resolve("Hey"),3000));
+
+  return new Promise(resolve=>setTimeout(()=>resolve("Got it."),3000));
 }
 
 async function send(){
-  const text = input.value.trim();
+  const text=input.value.trim();
   if(!text) return;
-  input.value = "";
-  addMessage(text, "user");
-  const typing = showTyping();
-  const reply = await aiResponse(text);
+  input.value="";
+  addMessage(text,"user");
+  const typing=showTyping();
+  const reply=await aiResponse(text);
   typing.remove();
-  if(reply && typeof reply === "object" && reply.type === "image"){
-    addMessage(reply,"ai");
-  } else {
-    addMessage(reply,"ai");
-    if(voiceEnabled && typeof reply==="string"){
-      let u=new SpeechSynthesisUtterance(reply);
-      speechSynthesis.speak(u);
-    }
-  }
+  if(reply && typeof reply==="object" && reply.type==="image") addMessage(reply,"ai");
+  else addMessage(reply,"ai");
+  if(voiceEnabled && typeof reply==="string") speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
 }
 
-input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
+input.addEventListener("keydown",e=>{if(e.key==="Enter")send();});
 
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
   rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
   rec.start();
 }
+
+// Load chat history on start
+loadChat();
 </script>
 </body>
 </html>
