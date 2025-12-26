@@ -148,17 +148,17 @@ function logout(){username="";password="";age=0;localStorage.removeItem("usernam
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
-/* AI + Smart Math + Image + Big Numbers */
+/* AI + Smart Math + Big Numbers + Thinking Delay */
 async function aiResponse(text){
   let t = text.toLowerCase().trim();
-
-  // Replace x and ÷ for math
+  
+  // Replace x and ÷
   let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
 
-  // Evaluate math if valid
+  // If it's math
   if(/^[0-9+\-*/().\s]+$/.test(mathText)){
     try {
-      // Handle huge numbers
+      await new Promise(r=>setTimeout(r, 5000)); // 5s delay for math
       if(/^\d+$/.test(mathText.replace(/\s+/g,''))){
         return BigInt(eval(mathText)).toString();
       }
@@ -168,11 +168,12 @@ async function aiResponse(text){
 
   // Slang
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
-  if(slang[t]) return slang[t];
+  if(slang[t]) { await new Promise(r=>setTimeout(r, 3000)); return slang[t]; }
 
   // Image
   let imgWords=["draw","create","image","picture","make"];
   if(imgWords.some(w=>t.includes(w))){
+    await new Promise(r=>setTimeout(r, 4000)); // thinking delay
     let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
     try{
       const res = await fetch('http://localhost:3000/generate-image',{
@@ -187,8 +188,8 @@ async function aiResponse(text){
     }catch{ return "⚠️ Image server offline"; }
   }
 
+  await new Promise(r=>setTimeout(r, 3000)); // default thinking delay
   if(t==="hi"||t==="hello") return "Hey";
-
   return "Got it.";
 }
 
@@ -213,7 +214,6 @@ async function send(){
 
 input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
 
-/* Voice input */
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
   rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
