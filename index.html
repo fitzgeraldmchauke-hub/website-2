@@ -1,3 +1,4 @@
+my site
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,17 +134,19 @@ function uploadAvatar(){
 }
 
 function login(){
-  let u=document.getElementById("usernameInput").value.trim();
-  let p=document.getElementById("passwordInput").value.trim();
-  let a=parseInt(document.getElementById("ageInput").value);
-  if(a<10||a>100){alert("Age must be 10-100");return;}
-  username=u; password=p; age=a;
-  localStorage.setItem("username",u); localStorage.setItem("password",p); localStorage.setItem("age",a);
+  let u = document.getElementById("usernameInput").value.trim();
+  let p = document.getElementById("passwordInput").value.trim();
+  let a = parseInt(document.getElementById("ageInput").value);
+  if(a<10||a>100){ alert("Age must be 10-100"); return; }
+  username = u; password = p; age = a;
+  localStorage.setItem("username", u);
+  localStorage.setItem("password", p);
+  localStorage.setItem("age", a);
   closePopups();
-  addMessage(`Logged in as ${username}`, "ai");
+  // No chat message for login
 }
 
-function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");addMessage("Logged out","ai");}
+function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
@@ -151,7 +154,7 @@ function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.displa
 async function aiResponse(text){
   let t = text.toLowerCase();
   if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah 😄","idk":"That’s fine.","fr":"For real."};
+  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
 
   let imgWords=["draw","create","image","picture","make"];
@@ -176,7 +179,7 @@ async function aiResponse(text){
   }
 
   if(/^[0-9+\-*/().\s]+$/.test(text)){try{return String(Function("return "+text)());}catch{}}
-  if(t==="hi"||t==="hello") return "Hey 👋";
+  if(t==="hi"||t==="hello") return "Hey";
   return "Got it.";
 }
 
