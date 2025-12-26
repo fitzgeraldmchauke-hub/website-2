@@ -128,8 +128,8 @@ function openPeople(){document.getElementById("peoplePopup").style.display="bloc
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
 function uploadAvatar(){
-  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
-  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
+  if(!username){alert("Login first!");return;}
+  const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>profilePic.src=URL.createObjectURL(e.target.files[0]);f.click();
 }
 
 function login(){
@@ -142,73 +142,7 @@ function login(){
   localStorage.setItem("password", p);
   localStorage.setItem("age", a);
   closePopups();
-  // No chat message for login
 }
 
 function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
-
-function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
-
-/* AI Response with real image generation */
-async function aiResponse(text){
-  let t = text.toLowerCase();
-  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
-  if(slang[t]) return slang[t];
-
-  let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
-    if(!subject) subject="art";
-    try{
-      const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({prompt: subject})
-      });
-      const data = await res.json();
-      if(data?.data?.[0]?.url){
-        return {type:"image", src: data.data[0].url};
-      } else {
-        return "⚠️ Could not generate image.";
-      }
-    } catch(e){
-      return "⚠️ Error contacting AI server.";
-    }
-  }
-
-  if(/^[0-9+\-*/().\s]+$/.test(text)){try{return String(Function("return "+text)());}catch{}}
-  if(t==="hi"||t==="hello") return "Hey";
-  return "Got it.";
-}
-
-async function send(){
-  const text = input.value.trim();
-  if(!text) return;
-  input.value = "";
-  addMessage(text, "user");
-  const typing = showTyping();
-  const reply = await aiResponse(text);
-  typing.remove();
-  if(reply && typeof reply === "object" && reply.type === "image"){
-    addMessage(reply,"ai");
-  } else {
-    addMessage(reply,"ai");
-    if(voiceEnabled && typeof reply==="string"){
-      let u=new SpeechSynthesisUtterance(reply);
-      speechSynthesis.speak(u);
-    }
-  }
-}
-
-input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
-
-/* Voice input */
-function startVoice(){
-  const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
-  rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
-  rec.start();
-}
-</script>
-</body>
-</html>
+function c
