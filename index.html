@@ -94,4 +94,30 @@ let voiceEnabled = true;
 let clickCount = 0;
 let username = localStorage.getItem("username")||"";
 let password = localStorage.getItem("password")||"";
-let age =
+let age = parseInt(localStorage.getItem("age"))||0;
+let imageHistory = [];
+
+function addMessage(content, who){
+    const div=document.createElement("div");
+    div.className="msg "+who;
+    if(content && typeof content==="object" && content.type==="image"){
+        const img=document.createElement("img");
+        img.src=content.src;
+        div.appendChild(img);
+        imageHistory.push(content.src);
+    } else div.textContent=content;
+    messages.appendChild(div);
+    messages.scrollTop=messages.scrollHeight;
+}
+
+function showTyping(){
+    const d=document.createElement("div");
+    d.className="msg ai typing";
+    d.textContent="...";
+    messages.appendChild(d);
+    return d;
+}
+
+function clearChat(){messages.innerHTML="";}
+function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
+functio
