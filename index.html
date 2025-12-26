@@ -32,7 +32,6 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </head>
 <body>
 
-<!-- Sidebar Buttons Placement preserved exactly -->
 <div id="sidebar">
 <h2>four.gb</h2>
 <img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
@@ -42,10 +41,10 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 <button onclick="clearChat()">🧹 Clear</button>
 <button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
 <button onclick="openProfile()">👤 Profile</button>
+<button id="projectsBtn" onclick="showProjects()">📁 Projects</button>
 </div>
 
 <div id="main">
-<!-- Topbar Buttons Placement preserved -->
 <div id="topbar">
 <button onclick="openShare()">🔗 Share</button>
 <button onclick="openPeople()">👥 Add</button>
@@ -60,7 +59,6 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </div>
 </div>
 
-<!-- Popups Placement preserved -->
 <div id="sharePopup" class="popup">
 <div>Link copied!</div>
 <button onclick="closePopups()">OK</button>
@@ -97,8 +95,7 @@ let username = localStorage.getItem("username")||"";
 let password = localStorage.getItem("password")||"";
 let age = parseInt(localStorage.getItem("age"))||0;
 let imageHistory = [];
-
-function isLoggedIn(){return !!localStorage.getItem("username");}
+let projects = JSON.parse(localStorage.getItem("projects")||"[]");
 
 function addMessage(content, who) {
   const div = document.createElement("div");
@@ -124,51 +121,34 @@ function showTyping() {
 function clearChat(){messages.innerHTML="";}
 function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
 function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
+function showProjects(){
+  clearChat();
+  projects.forEach((p,i)=>addMessage(`Project ${i+1}: ${p}`,"ai"));
+}
+function toggleVoice(){
+  voiceEnabled = !voiceEnabled;
+  voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;
+}
 function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
 
 function uploadAvatar(){
-  const f = document.createElement("input");
-  f.type = "file";
-  f.accept = "image/*";
-  f.onchange = e => {
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      profilePic.src = reader.result;
-      if(isLoggedIn()){
-        localStorage.setItem("avatar", reader.result);
-      } else {
-        setTimeout(() => {
-          profilePic.style.transition = "1.5s ease";
-          profilePic.style.filter = "blur(6px)";
-          profilePic.style.opacity = "0";
-          profilePic.style.transform = "scale(0.3) rotate(25deg)";
-        }, 1200);
-        setTimeout(() => {
-          profilePic.src = "";
-          profilePic.style.transition = "";
-          profilePic.style.filter = "";
-          profilePic.style.opacity = "1";
-          profilePic.style.transform = "";
-        }, 3000);
-      }
-    };
-    reader.readAsDataURL(file);
+  if(!username){alert("Login first!"); return;}
+  const f=document.createElement("input");
+  f.type="file";
+  f.accept="image/*";
+  f.onchange=e=>{
+    profilePic.src=URL.createObjectURL(e.target.files[0]);
+    profilePic.style.transition="all 3s ease-out";
+    profilePic.style.opacity="1";
+    setTimeout(()=>{
+      profilePic.style.opacity="0";
+    },3000); // disappears like Thanos snap
   };
   f.click();
 }
-
-window.addEventListener("load", () => {
-  const savedAvatar = localStorage.getItem("avatar");
-  if(savedAvatar){
-    profilePic.src = savedAvatar;
-  }
-});
 
 function login(){
   let u = document.getElementById("usernameInput").value.trim();
@@ -182,19 +162,35 @@ function login(){
   closePopups();
 }
 
-function logout(){username="";password="";age=0; localStorage.removeItem("username"); localStorage.removeItem("password");localStorage.removeItem("age");localStorage.removeItem("avatar");}
+function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
-/* AI + Math + Big Numbers + Delay */
+/* AI + Math + Image + Rick Roll Easter Egg */
 async function aiResponse(text){
   let t = text.toLowerCase().trim();
-  t = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
+
+  // Delay for "thinking"
+  await new Promise(r=>setTimeout(r,3000));
+
+  // Rick Roll Easter Egg
+  if(t==="doodledog6767") return "🎵 Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ 🎵";
+
+  // Slang responses
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
+
+  // Math parsing
+  let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
+  if(/^[0-9+\-*/().\s]+$/.test(mathText)){
+    try{return String(Function("return "+mathText)());}catch{}
+  }
+
+  // Image generation
   let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.includes(w))){
-    let subject=t.replace(/^(please\s+)?(draw|create|make|image|picture)\s+(of\s+)?/,"").trim()||"art";
+  if(imgWords.some(w=>t.startsWith(w))){
+    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
+    if(!subject) subject="art";
     try{
       const res = await fetch('http://localhost:3000/generate-image',{
         method:'POST',
@@ -202,23 +198,13 @@ async function aiResponse(text){
         body: JSON.stringify({prompt: subject})
       });
       const data = await res.json();
-      const url = data?.data?.[0]?.url || data?.url;
-      if(url) return {type:"image", src:url};
-      return "⚠️ No image returned";
-    }catch{ return "⚠️ Image server offline"; }
+      if(data?.data?.[0]?.url) return {type:"image", src:data.data[0].url};
+      return "⚠️ Could not generate image.";
+    }catch{return "⚠️ Error contacting AI server.";}
   }
 
-  if(/^[0-9+\-*/().\s]+$/.test(t)){
-    return new Promise(resolve => {
-      setTimeout(() => {
-        try{ resolve(String(Function("return "+t)())); }
-        catch{ resolve("⚠️ Calculation error"); }
-      }, 3500);
-    });
-  }
-
-  if(t==="hi"||t==="hello") return new Promise(resolve => setTimeout(()=>resolve("Hey"), 2500));
-  return new Promise(resolve => setTimeout(()=>resolve("Unidentified."), 3500));
+  if(t==="hi"||t==="hello") return "Hey";
+  return "Got it.";
 }
 
 async function send(){
@@ -231,18 +217,19 @@ async function send(){
   typing.remove();
   addMessage(reply,"ai");
   if(voiceEnabled && typeof reply==="string"){
-    speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
+    let u=new SpeechSynthesisUtterance(reply);
+    speechSynthesis.speak(u);
   }
 }
 
 input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
 
+/* Voice input */
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
   rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
   rec.start();
 }
 </script>
-
 </body>
 </html>
