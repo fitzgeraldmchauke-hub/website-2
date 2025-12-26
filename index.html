@@ -121,17 +121,15 @@ function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("act
 function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
 function toggleVoice(){
   voiceEnabled = !voiceEnabled;
-  voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;
+  voiceBtn.textContent = "🎙️ Voice " + (voiceEnabled ? "ON" : "OFF");
 }
 function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
 function uploadAvatar(){
-  if(!username){alert("Login first!");return;}
-  const f=document.createElement("input");f.type="file";f.accept="image/*";
-  f.onchange=e=>{profilePic.src=URL.createObjectURL(e.target.files[0]);};
-  f.click();
+  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
 }
 
 function login(){
@@ -147,74 +145,66 @@ function login(){
 }
 
 function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
+
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
-/* AI Response */
+/* AI Response with real image generation */
 async function aiResponse(text){
-  let t=text.toLowerCase().trim();
-
-  // Smart 3–5 second thinking delay
-  await new Promise(r=>setTimeout(r, 3000 + Math.random()*2000));
-
-  // Slang & simple responses
+  let t = text.toLowerCase();
+  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
-  if(t==="hi"||t==="hello") return "Hey";
 
-  // Replace x/÷ for math
-  let mathText = t.replace(/(\d+)\s*x\s*(\d+)/gi,"$1*$2").replace(/÷/g,"/");
-  // Remove = if present
-  mathText = mathText.replace(/=$/,"");
-  // Compare: "which is bigger" or ">" "<"
-  if(/which is bigger|>/.test(t)){
-    try{
-      let numbers = t.match(/[\d,]+/g).map(n=>Number(n.replace(/,/g,'')));
-      if(numbers.length>=2){
-        return `${Math.max(...numbers)} is bigger`;
-      }
-    }catch{}
-    return "Could not determine";
-  }
-
-  // Evaluate math if only numbers and operators
-  if(/^[0-9+\-*/().\s]+$/.test(mathText)){
-    try{ 
-      return String(Function("return "+mathText)());
-    }catch{}
-  }
-
-  // Image requests
   let imgWords=["draw","create","image","picture","make"];
   if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").trim()||"art";
+    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
+    if(!subject) subject="art";
     try{
       const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST', headers:{'Content-Type':'application/json'},
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify({prompt: subject})
       });
       const data = await res.json();
-      if(data?.data?.[0]?.url) return {type:"image", src:data.data[0].url};
-      return "⚠️ Could not generate image.";
-    }catch{return "⚠️ Error contacting AI server.";}
+      if(data?.data?.[0]?.url){
+        return {type:"image", src: data.data[0].url};
+      } else {
+        return "⚠️ Could not generate image.";
+      }
+    } catch(e){
+      return "⚠️ Error contacting AI server.";
+    }
   }
 
+  if(/^[0-9+\-*/().\s]+$/.test(text)){
+    try{return String(Function("return "+text)());}catch{}
+  }
+  if(t==="hi"||t==="hello") return "Hey";
   return "Got it.";
 }
 
 async function send(){
   const text = input.value.trim();
   if(!text) return;
-  input.value="";
-  addMessage(text,"user");
+  input.value = "";
+  addMessage(text, "user");
   const typing = showTyping();
   const reply = await aiResponse(text);
   typing.remove();
-  addMessage(reply,"ai");
-  if(voiceEnabled && typeof reply==="string") speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
+  if(reply && typeof reply === "object" && reply.type === "image"){
+    addMessage(reply,"ai");
+  } else {
+    addMessage(reply,"ai");
+    if(voiceEnabled && typeof reply==="string"){
+      let u=new SpeechSynthesisUtterance(reply);
+      speechSynthesis.speak(u);
+    }
+  }
 }
 
 input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
 
+/* Voice input */
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
   rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
