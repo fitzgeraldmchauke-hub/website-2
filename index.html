@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>four.gb</title>
+<title>four.gb with Projects</title>
 <style>
 body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; background:#0f0f0f; color:white; overflow:hidden;}
 #sidebar {width:220px; background:#161616; padding:12px; display:flex; flex-direction:column; align-items:center;}
@@ -25,30 +25,29 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 #send {width:44px; height:44px; border-radius:50%; border:none; background:#2e6cff; color:white; font-size:18px; cursor:pointer;}
 .popup {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e1e1e; padding:16px; border-radius:12px; display:none; width:280px; z-index:100;}
 .popup button {width:100%; margin-top:8px;}
-#profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto; transition: all 3s ease-out;}
-#motherBtn {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:red; display:none; cursor:pointer; z-index:200;}
-#profileRing {border:5px solid gold; border-radius:50%; display:none; width:80px; height:80px; position:absolute; top:8px; left:8px;}
+#projectsList {margin-top:12px; width:100%; display:flex; flex-direction:column; gap:4px; max-height:300px; overflow-y:auto;}
+.projectBtn {background:#2a2a2a; border:none; border-radius:8px; color:white; padding:6px; cursor:pointer; text-align:left;}
+.projectBtn.active {background:#2e6cff;}
 </style>
 </head>
 <body>
 
 <div id="sidebar">
 <h2>four.gb</h2>
-<img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
-<div id="profileRing"></div>
 <button id="chatBtn" class="active" onclick="showChat()">💬 Chat</button>
 <button id="imgBtn" onclick="showImages()">🖼️ Images</button>
 <button onclick="clearChat()">🧹 Clear</button>
-<button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
 <button onclick="openProfile()">👤 Profile</button>
-<button id="projectsBtn" onclick="showProjects()">📁 Projects</button>
+<div style="margin-top:12px; width:90%;">
+<button onclick="addProject()">➕ New Project</button>
+<div id="projectsList"></div>
+</div>
 </div>
 
 <div id="main">
 <div id="topbar">
 <button onclick="openShare()">🔗 Share</button>
 <button onclick="openPeople()">👥 Add</button>
-<button onclick="startVoice()">🎤 Talk</button>
 </div>
 
 <div id="messages"></div>
@@ -59,199 +58,74 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 </div>
 </div>
 
-<div id="sharePopup" class="popup">
-<div>Link copied!</div>
-<button onclick="closePopups()">OK</button>
-</div>
-<div id="peoplePopup" class="popup">
-<div>Add people coming soon</div>
-<button onclick="closePopups()">Close</button>
-</div>
-<div id="profilePopup" class="popup">
-<div>Profile Info</div>
-<input id="usernameInput" placeholder="Username" />
-<input id="passwordInput" type="password" placeholder="Password" />
-<input id="ageInput" type="number" placeholder="Age 10-100" />
-<button onclick="login()">Login / Set</button>
-<button onclick="logout()">Logout</button>
-<button onclick="closePopups()">Close</button>
-</div>
-
-<div id="motherBtn" onclick="clickMother()">Mother</div>
-
 <script>
 let messages = document.getElementById("messages");
 let input = document.getElementById("input");
-let chatBtn = document.getElementById("chatBtn");
-let imgBtn = document.getElementById("imgBtn");
-let motherBtn = document.getElementById("motherBtn");
-let profilePic = document.getElementById("profilePic");
-let profileRing = document.getElementById("profileRing");
-let voiceBtn = document.getElementById("voiceBtn");
-
-let voiceEnabled = true;
-let clickCount = 0;
-let username = localStorage.getItem("username")||"";
-let password = localStorage.getItem("password")||"";
-let age = parseInt(localStorage.getItem("age"))||0;
-let imageHistory = JSON.parse(localStorage.getItem("images")||"[]");
-let projects = JSON.parse(localStorage.getItem("projects")||"[]");
-let chatHistory = JSON.parse(localStorage.getItem("chatHistory")||"[]");
-
-// Load avatar
-let savedAvatar = localStorage.getItem("avatar");
-if(savedAvatar) profilePic.src = savedAvatar;
-
-// Load previous chat
-chatHistory.forEach(c=>{
-  addMessage(c.msg, c.who);
-});
-
-function saveChat(msg, who){
-  chatHistory.push({msg, who});
-  localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-}
+let projectsList = document.getElementById("projectsList");
+let currentProject = null;
+let projects = {};
 
 function addMessage(content, who) {
+  if(!currentProject) return alert("Select a project first!");
   const div = document.createElement("div");
   div.className = "msg "+who;
-  if(content && typeof content==="object" && content.type==="image"){
-    const img=document.createElement("img");
-    img.src=content.src;
-    div.appendChild(img);
-    imageHistory.push(content.src);
-    localStorage.setItem("images", JSON.stringify(imageHistory));
-  } else div.textContent=content;
+  div.textContent = content;
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
-  saveChat(typeof content==="object"?JSON.stringify(content):content, who);
+  // Save in project
+  projects[currentProject].messages.push({content, who});
 }
 
-function showTyping() {
-  const d=document.createElement("div");
-  d.className="msg ai typing";
-  d.textContent="...";
-  messages.appendChild(d);
-  return d;
-}
-
-function clearChat(){
-  messages.innerHTML="";
-  chatHistory = [];
-  localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-}
+function clearChat(){messages.innerHTML="";}
 function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
-function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function showProjects(){
-  clearChat();
-  projects.forEach((p,i)=>addMessage(`Project ${i+1}: ${p}`,"ai"));
-}
-function toggleVoice(){
-  voiceEnabled = !voiceEnabled;
-  voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;
-}
-function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
-function openPeople(){document.getElementById("peoplePopup").style.display="block";}
-function openProfile(){document.getElementById("profilePopup").style.display="block";}
-function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
+function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();}
 
-function uploadAvatar(){
-  if(!username){alert("Login first!"); return;}
-  const f=document.createElement("input");
-  f.type="file";
-  f.accept="image/*";
-  f.onchange=e=>{
-    profilePic.src=URL.createObjectURL(e.target.files[0]);
-    localStorage.setItem("avatar", profilePic.src);
-    profilePic.style.opacity="1";
-    setTimeout(()=>{
-      profilePic.style.opacity="0";
-      localStorage.removeItem("avatar");
-    },3000);
+function addProject(){
+  const name = prompt("Enter project name:");
+  if(!name) return;
+  if(projects[name]) return alert("Project already exists!");
+  projects[name] = {messages: []};
+  
+  const btn = document.createElement("button");
+  btn.className="projectBtn";
+  btn.textContent = name;
+  btn.onclick = ()=>{
+    document.querySelectorAll(".projectBtn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentProject = name;
+    loadProject(name);
   };
-  f.click();
+  projectsList.appendChild(btn);
+  
+  // Auto-select first project
+  if(!currentProject){
+    btn.click();
+  }
 }
 
-function login(){
-  let u = document.getElementById("usernameInput").value.trim();
-  let p = document.getElementById("passwordInput").value.trim();
-  let a = parseInt(document.getElementById("ageInput").value);
-  if(a<10||a>100){ alert("Age must be 10-100"); return; }
-  username = u; password = p; age = a;
-  localStorage.setItem("username", u);
-  localStorage.setItem("password", p);
-  localStorage.setItem("age", a);
-  closePopups();
-}
-
-function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
-
-function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
-
-/* AI + Math + Image + Rick Roll Easter Egg */
-async function aiResponse(text){
-  let t = text.toLowerCase().trim();
-
-  // Delay for "thinking"
-  await new Promise(r=>setTimeout(r,3000));
-
-  // Rick Roll Easter Egg
-  if(t==="doodledog6767") return "🎵 Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ 🎵";
-
-  // Slang responses
-  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
-  if(slang[t]) return slang[t];
-
-  // Math parsing
-  let mathText = t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
-  if(/^[0-9+\-*/().\s]+$/.test(mathText)){
-    try{return String(Function("return "+mathText)());}catch{}
-  }
-
-  // Image generation
-  let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
-    if(!subject) subject="art";
-    try{
-      const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({prompt: subject})
-      });
-      const data = await res.json();
-      if(data?.data?.[0]?.url) return {type:"image", src:data.data[0].url};
-      return "⚠️ Could not generate image.";
-    }catch{return "⚠️ Error contacting AI server.";}
-  }
-
-  if(t==="hi"||t==="hello") return "Hey";
-  return "Got it.";
+function loadProject(name){
+  messages.innerHTML="";
+  projects[name].messages.forEach(m=>addMessage(m.content,m.who));
 }
 
 async function send(){
+  if(!currentProject) return alert("Select a project first!");
   const text = input.value.trim();
   if(!text) return;
-  input.value = "";
+  input.value="";
   addMessage(text,"user");
-  const typing = showTyping();
-  const reply = await aiResponse(text);
-  typing.remove();
-  addMessage(reply,"ai");
-  if(voiceEnabled && typeof reply==="string"){
-    let u=new SpeechSynthesisUtterance(reply);
-    speechSynthesis.speak(u);
-  }
-}
-
-input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
-
-/* Voice input */
-function startVoice(){
-  const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
-  rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
-  rec.start();
+  // Fake AI delay
+  const typingDiv = document.createElement("div");
+  typingDiv.className="msg ai typing";
+  typingDiv.textContent="...";
+  messages.appendChild(typingDiv);
+  messages.scrollTop = messages.scrollHeight;
+  setTimeout(()=>{
+    typingDiv.remove();
+    addMessage("Got it.","ai");
+  },2000);
 }
 </script>
+
 </body>
 </html>
