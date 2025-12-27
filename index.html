@@ -22,12 +22,10 @@ body{
   padding:12px;
   display:flex;
   flex-direction:column;
-  align-items:center;
   gap:6px;
 }
-#sidebar h2{margin:6px 0;}
+#sidebar h2{margin:6px 0;text-align:center}
 #sidebar button{
-  width:100%;
   padding:10px;
   border:none;
   border-radius:8px;
@@ -37,335 +35,277 @@ body{
 }
 #sidebar button:hover{background:#444}
 #sidebar button.active{background:#2e6cff}
+#projectList{flex:1;overflow-y:auto}
 
 /* AVATAR */
+#profileWrap{position:relative;text-align:center}
 #profilePic{
-  width:70px;
-  height:70px;
-  border-radius:50%;
-  background:#333;
-  object-fit:cover;
-  cursor:pointer;
-  margin-bottom:6px;
+  width:70px;height:70px;border-radius:50%;
+  background:#333;object-fit:cover;cursor:pointer
+}
+#ring{
+  position:absolute;top:-6px;left:-6px;
+  width:82px;height:82px;border-radius:50%;
+  border:4px solid gold;display:none
 }
 
 /* MAIN */
-#main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
+#main{flex:1;display:flex;flex-direction:column}
 
 /* TOP BAR */
 #topbar{
-  height:48px;
-  background:#121212;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:0 12px;
+  height:48px;background:#121212;
+  display:flex;justify-content:flex-end;
+  align-items:center;gap:10px;padding:0 12px
 }
 #topbar button{
-  background:#2a2a2a;
-  border:none;
-  border-radius:8px;
-  color:white;
-  padding:6px 10px;
-  cursor:pointer;
+  background:#2a2a2a;border:none;border-radius:8px;
+  color:white;padding:6px 10px;cursor:pointer
 }
 
 /* CHAT */
 #messages{
-  flex:1;
-  padding:12px;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  flex:1;padding:12px;overflow-y:auto;
+  display:flex;flex-direction:column;gap:8px
 }
-.msg{
-  max-width:80%;
-  padding:10px 14px;
-  border-radius:14px;
-}
-.user{align-self:flex-end;background:#2e6cff;}
-.ai{align-self:flex-start;background:#2a2a2a;}
+.msg{max-width:80%;padding:10px 14px;border-radius:14px}
+.user{align-self:flex-end;background:#2e6cff}
+.ai{align-self:flex-start;background:#2a2a2a}
+.typing{letter-spacing:6px;animation:blink 1.4s infinite}
+@keyframes blink{0%{opacity:.2}20%{opacity:1}100%{opacity:.2}}
 
-#input-area{
-  display:flex;
-  gap:8px;
-  padding:10px;
-  background:#111;
-}
+#input-area{display:flex;gap:8px;padding:10px;background:#111}
 #input{
-  flex:1;
-  padding:10px;
-  border-radius:10px;
-  border:none;
-  background:#222;
-  color:white;
+  flex:1;padding:10px;border-radius:10px;
+  border:none;background:#222;color:white
 }
 #send{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  border:none;
-  background:#2e6cff;
-  color:white;
-  font-size:18px;
-  cursor:pointer;
+  width:44px;height:44px;border-radius:50%;
+  border:none;background:#2e6cff;color:white;
+  font-size:18px;cursor:pointer
 }
 
 /* POPUPS */
 .popup{
-  position:fixed;
-  top:50%;
-  left:50%;
+  position:fixed;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  background:#1e1e1e;
-  padding:16px;
-  border-radius:12px;
-  display:none;
-  z-index:100;
-  width:260px;
+  background:#1e1e1e;padding:16px;
+  border-radius:12px;display:none;z-index:100;
+  width:260px
 }
-.popup input,.popup button{
-  width:100%;
-  margin-top:8px;
-}
+.popup input,.popup button{width:100%;margin-top:8px}
 </style>
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
 <div id="sidebar">
   <h2>four.gb</h2>
-  <img id="profilePic" title="Upload avatar">
 
-  <button id="chatBtn" class="active" onclick="showChat()">Chat</button>
-  <button id="imgBtn" onclick="showImages()">Images</button>
+  <div id="profileWrap">
+    <img id="profilePic">
+    <div id="ring"></div>
+  </div>
+
+  <button onclick="showChat()">Chat</button>
+  <button onclick="showImages()">Images</button>
   <button onclick="clearChat()">Clear</button>
-
-  <button onclick="newProject()">New Project</button>
-  <button onclick="pickProject()">Projects</button>
-
+  <button onclick="toggleVoice()">Voice</button>
   <button onclick="openProfile()">Profile</button>
+
+  <div id="projectList"></div>
+  <button onclick="newProject()">Projects</button>
 </div>
 
-<!-- MAIN -->
 <div id="main">
   <div id="topbar">
-    <button onclick="addUser()">Add</button>
-    <button onclick="share()">Share</button>
-    <button onclick="talk()">Talk</button>
+    <button onclick="openAdd()">Add</button>
+    <button onclick="openShare()">Share</button>
+    <button onclick="toggleVoice()">Voice</button>
   </div>
 
   <div id="messages"></div>
 
   <div id="input-area">
-    <input id="input" placeholder="Ask anything…" />
-    <button id="send" onclick="send()">➤</button>
+    <input id="input" placeholder="Ask anything">
+    <button id="send" onclick="send()">></button>
   </div>
 </div>
 
-<!-- PROFILE POPUP -->
+<!-- POPUPS -->
+<div id="addPopup" class="popup">
+  <input id="addUserInput" placeholder="Username">
+  <button onclick="confirmAdd()">Add</button>
+  <button onclick="closePopups()">Close</button>
+</div>
+
+<div id="sharePopup" class="popup">
+  <div>Link copied</div>
+  <button onclick="closePopups()">OK</button>
+</div>
+
 <div id="profilePopup" class="popup">
   <input id="usernameInput" placeholder="Username">
-  <button onclick="login()">Login / Save</button>
+  <button onclick="login()">Save</button>
   <button onclick="logout()">Logout</button>
   <button onclick="closePopups()">Close</button>
 </div>
 
 <script>
-/* ================= STATE ================= */
+/* STATE */
 let projects = JSON.parse(localStorage.getItem("projects")||"{}");
-let currentProject = localStorage.getItem("currentProject") || null;
+let currentProject = localStorage.getItem("currentProject")||null;
+let images = JSON.parse(localStorage.getItem("images")||"[]");
+let username = localStorage.getItem("username")||"";
+let avatar = localStorage.getItem("avatar")||"";
+let voiceOn=false,recognition=null;
+let motherClicks=0;
 
-let username = localStorage.getItem("username") || "";
-let avatar = localStorage.getItem("avatar") || "";
+/* INIT */
+if(!currentProject){createProject("Main")}
+renderProjects();
+openProject(currentProject);
+if(avatar)profilePic.src=avatar;
 
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
-const profilePic = document.getElementById("profilePic");
-const chatBtn = document.getElementById("chatBtn");
-const imgBtn = document.getElementById("imgBtn");
-
-/* ================= INIT ================= */
-if(!currentProject){
-  newProject();
-}else{
-  openProject(currentProject);
+/* PROJECTS */
+function createProject(name){
+  projects[name]=[];
+  currentProject=name;
+  save();
 }
-if(avatar) profilePic.src = avatar;
-
-/* ================= SIDEBAR MODES ================= */
-function showChat(){
-  chatBtn.classList.add("active");
-  imgBtn.classList.remove("active");
-  openProject(currentProject);
+function newProject(){
+  const n=prompt("Project name");
+  if(!n||projects[n])return;
+  createProject(n);renderProjects();openProject(n);
 }
-function showImages(){
-  chatBtn.classList.remove("active");
-  imgBtn.classList.add("active");
-  messages.innerHTML="";
+function renderProjects(){
+  projectList.innerHTML="";
+  Object.keys(projects).forEach(p=>{
+    const b=document.createElement("button");
+    b.textContent=p;
+    if(p===currentProject)b.classList.add("active");
+    b.onclick=()=>openProject(p);
+    projectList.appendChild(b);
+  });
 }
-
-/* ================= PROJECTS ================= */
-function saveProjects(){
+function openProject(p){
+  currentProject=p;messages.innerHTML="";
+  projects[p].forEach(m=>render(m.text,m.who));
+  renderProjects();save();
+}
+function save(){
   localStorage.setItem("projects",JSON.stringify(projects));
   localStorage.setItem("currentProject",currentProject);
+  localStorage.setItem("images",JSON.stringify(images));
 }
 
-function newProject(){
-  const name = prompt("Project name?");
-  if(!name || projects[name]) return;
-  projects[name]=[];
-  openProject(name);
-}
-
-function pickProject(){
-  const list = Object.keys(projects);
-  if(!list.length) return alert("No projects");
-  const choice = prompt("Projects:\n"+list.join("\n"));
-  if(projects[choice]) openProject(choice);
-}
-
-function openProject(name){
-  currentProject=name;
-  messages.innerHTML="";
-  projects[name].forEach(m=>renderMessage(m.text,m.who));
-  saveProjects();
-}
-
-function clearChat(){
-  projects[currentProject]=[];
-  messages.innerHTML="";
-  saveProjects();
-}
-
-/* ================= CHAT ================= */
-function renderMessage(text,who){
+/* CHAT */
+function render(t,w){
   const d=document.createElement("div");
-  d.className="msg "+who;
-  d.textContent=text;
+  d.className="msg "+w;
+  d.textContent=t;
   messages.appendChild(d);
-  messages.scrollTop=messages.scrollHeight;
+}
+function typing(){
+  const d=document.createElement("div");
+  d.className="msg ai typing";
+  d.textContent="...";
+  messages.appendChild(d);
+  return d;
+}
+function send(){
+  const t=input.value.trim();if(!t)return;
+  input.value="";
+  add(t,"user");
+  const dots=typing();
+  setTimeout(()=>{
+    dots.remove();
+    add(ai(t),"ai");
+  },3000);
+}
+input.onkeydown=e=>{if(e.key==="Enter")send()};
+function add(t,w){
+  projects[currentProject].push({text:t,who:w});
+  render(t,w);save();
 }
 
-function addMessage(text,who){
-  const last=projects[currentProject].at(-1);
-  if(last && last.text===text && last.who===who) return;
-  projects[currentProject].push({text,who});
-  renderMessage(text,who);
-  saveProjects();
-}
-
-/* ================= AI ================= */
-function parseBig(str){
-  const m={thousand:1e3,million:1e6,billion:1e9,trillion:1e12,quadrillion:1e15,quintillion:1e18,sextillion:1e21};
-  let r=str.match(/([\d.]+)\s*(\w+)?/);
-  if(!r) return NaN;
-  let n=parseFloat(r[1]);
-  if(m[r[2]]) n*=m[r[2]];
-  return n;
-}
-
-function aiReply(t){
-  let s=t.toLowerCase();
-
+/* AI */
+function ai(t){
+  const s=t.toLowerCase();
   if(s==="doodledog6767")
     return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-
-  let math=s.replace(/(\d)\s*x\s*(\d)/g,"$1*$2");
-  if(/^[\d+\-*/().\s]+$/.test(math)){
-    try{return String(Function("return "+math)());}catch{}
+  let m=s.replace(/times/g,"*").replace(/x/g,"*");
+  if(/[\d]/.test(m)){
+    try{return String(Function("return "+m)());}catch{}
   }
-
-  if(s.includes("bigger than")){
-    let p=s.split("bigger than");
-    let a=parseBig(p[0]),b=parseBig(p[1]);
-    if(!isNaN(a)&&!isNaN(b))
-      return a>b?"First is bigger":b>a?"Second is bigger":"Equal";
-  }
-
-  return "I understand.";
+  return "I understand";
 }
 
-/* ================= SEND ================= */
-function send(){
-  if(!currentProject) return;
-  const text=input.value.trim();
-  if(!text) return;
-  input.value="";
-  addMessage(text,"user");
-  setTimeout(()=>addMessage(aiReply(text),"ai"),3000);
-}
+/* MODES */
+function showChat(){openProject(currentProject)}
+function showImages(){messages.innerHTML="";images.forEach(i=>render(i,"ai"))}
+function clearChat(){projects[currentProject]=[];messages.innerHTML="";save()}
 
-input.addEventListener("keydown",e=>{
-  if(e.key==="Enter"){e.preventDefault();send();}
-});
-
-/* ================= PROFILE ================= */
-profilePic.onclick=uploadAvatar;
-
-function uploadAvatar(){
+/* PROFILE */
+profilePic.onclick=()=>{
   const f=document.createElement("input");
   f.type="file";f.accept="image/*";
   f.onchange=e=>{
     const r=new FileReader();
     r.onload=()=>{
       profilePic.src=r.result;
-      if(username){
-        localStorage.setItem("avatar",r.result);
-      }else{
+      if(username){avatar=r.result;localStorage.setItem("avatar",r.result)}
+      else{
         setTimeout(()=>{
           profilePic.style.transition="1.5s";
           profilePic.style.opacity="0";
           profilePic.style.transform="scale(.2)";
         },1000);
-        setTimeout(()=>{
-          profilePic.src="";
-          profilePic.style.opacity="1";
-          profilePic.style.transform="";
-        },3000);
       }
     };
     r.readAsDataURL(e.target.files[0]);
   };
   f.click();
+};
+function openProfile(){profilePopup.style.display="block"}
+function login(){
+  username=usernameInput.value.trim();
+  localStorage.setItem("username",username);
+  closePopups();
 }
+function logout(){localStorage.clear();location.reload()}
 
-function openProfile(){
-  document.getElementById("profilePopup").style.display="block";
+/* POPUPS */
+function openAdd(){addPopup.style.display="block"}
+function confirmAdd(){closePopups()}
+function openShare(){
+  navigator.clipboard.writeText(location.href);
+  sharePopup.style.display="block";
 }
 function closePopups(){
   document.querySelectorAll(".popup").forEach(p=>p.style.display="none");
 }
-function login(){
-  username=document.getElementById("usernameInput").value.trim();
-  if(!username) return;
-  localStorage.setItem("username",username);
-  closePopups();
-}
-function logout(){
-  localStorage.clear();
-  location.reload();
+
+/* VOICE */
+function toggleVoice(){
+  if(!recognition){
+    recognition=new(window.SpeechRecognition||webkitSpeechRecognition)();
+    recognition.continuous=true;
+    recognition.onresult=e=>{
+      input.value+=e.results[e.results.length-1][0].transcript+" ";
+    };
+  }
+  voiceOn=!voiceOn;
+  voiceOn?recognition.start():recognition.stop();
 }
 
-/* ================= TOP BAR ================= */
-function addUser(){
-  const u=prompt("Enter username:");
-  if(u) alert("User '"+u+"' found (demo)");
-}
-function share(){
-  navigator.clipboard.writeText(location.href);
-  alert("Link copied");
-}
-function talk(){
-  alert("Voice coming soon");
-}
+/* MOTHER BUTTON */
+document.body.onclick=()=>{
+  motherClicks++;
+  if(motherClicks>=100){
+    ring.style.display="block";
+  }
+};
 </script>
-
 </body>
 </html>
