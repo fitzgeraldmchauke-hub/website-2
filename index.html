@@ -22,16 +22,15 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 @keyframes blink {0% {opacity:.2;} 20% {opacity:1;} 100% {opacity:.2;}}
 #input-area {display:flex; gap:8px; padding:10px; background:#111;}
 #input {flex:1; padding:10px; border-radius:10px; border:none; background:#222; color:white;}
-#send {width:44px; height:44px; border-radius:50%; border:none; background:#2e6cff; color:white; font-size:18px; cursor:pointer;}
+#send {width:44px; height:44px; border-radius:12px; border:none; background:#2e6cff; color:white; font-size:18px; font-weight:bold; box-shadow: 2px 2px 5px #000; cursor:pointer;}
 .popup {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e1e1e; padding:16px; border-radius:12px; display:none; width:280px; z-index:100;}
 .popup button {width:100%; margin-top:8px;}
 #profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto;}
 #motherBtn {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:red; display:none; cursor:pointer; z-index:200;}
 #profileRing {border:5px solid gold; border-radius:50%; display:none; width:80px; height:80px; position:absolute; top:8px; left:8px;}
-.projectBtn {margin-top:8px;}
-/* MOBILE STYLE */
-.mobile #main {flex-direction:column;}
-.mobile #input-area {order:-1;} /* move input-area to top */
+/* Mobile adjustments */
+.mobile #input-area {position:absolute; top:0; width:100%; padding:10px; z-index:10;}
+.mobile #messages {padding-top:64px;}
 </style>
 </head>
 <body>
@@ -45,8 +44,7 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 <button onclick="clearChat()">🧹 Clear</button>
 <button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
 <button onclick="openProfile()">👤 Profile</button>
-<button id="projectsBtn" onclick="addProject()">📁 Add Project</button>
-<div id="projectList"></div>
+<button id="projectsBtn" onclick="addProject()">📁 Projects</button>
 </div>
 
 <div id="main">
@@ -60,7 +58,7 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 
 <div id="input-area">
 <input id="input" placeholder="Ask anything…" />
-<button id="send" onclick="send()">✈️</button>
+<button id="send" onclick="send()">▶</button>
 </div>
 </div>
 
@@ -94,7 +92,7 @@ let profilePic = document.getElementById("profilePic");
 let profileRing = document.getElementById("profileRing");
 let voiceBtn = document.getElementById("voiceBtn");
 let projectsBtn = document.getElementById("projectsBtn");
-let projectList = document.getElementById("projectList");
+let projects = JSON.parse(localStorage.getItem("projects")||"[]");
 
 let voiceEnabled = true;
 let clickCount = 0;
@@ -102,24 +100,8 @@ let username = localStorage.getItem("username")||"";
 let password = localStorage.getItem("password")||"";
 let age = parseInt(localStorage.getItem("age"))||0;
 let imageHistory = [];
-let projects = JSON.parse(localStorage.getItem("projects")||"[]");
-let activeProjectIndex = null;
-
-function saveProjects(){localStorage.setItem("projects", JSON.stringify(projects)); renderProjects();}
-function renderProjects(){
-  projectList.innerHTML="";
-  projects.forEach((p,i)=>{
-    const btn=document.createElement("button");
-    btn.className="projectBtn";
-    btn.textContent=p.name;
-    btn.onclick=()=>{switchProject(i)};
-    projectList.appendChild(btn);
-  });
-}
-renderProjects();
 
 function addMessage(content, who) {
-  if(activeProjectIndex!==null) projects[activeProjectIndex].messages.push({content, who});
   const div = document.createElement("div");
   div.className = "msg "+who;
   if(content && typeof content==="object" && content.type==="image"){
@@ -140,28 +122,17 @@ function showTyping() {
   return d;
 }
 
-function clearChat(){messages.innerHTML=""; if(activeProjectIndex!==null) projects[activeProjectIndex].messages = [];}
+function clearChat(){messages.innerHTML="";}
 function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
 function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
+function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;}
 function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
-
 function uploadAvatar(){
   if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
-  else {
-    const f=document.createElement("input");
-    f.type="file";f.accept="image/*";
-    f.onchange=e=>{
-      const file=e.target.files[0];
-      profilePic.src=URL.createObjectURL(file);
-      // Thanos snap effect
-      setTimeout(()=>{profilePic.style.transition="all 2s"; profilePic.style.transform="scale(0) rotate(720deg)"; profilePic.style.opacity=0;},2000);
-    };
-    f.click();
-  }
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{profilePic.src=URL.createObjectURL(e.target.files[0]);};f.click();}
 }
 
 function login(){
@@ -175,32 +146,19 @@ function login(){
   localStorage.setItem("age", a);
   closePopups();
 }
+
 function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
 async function aiResponse(text){
   let t = text.toLowerCase();
-  if(t==="doodledog6767") return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
-  let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
-    if(!subject) subject="art";
-    try{
-      const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({prompt: subject})
-      });
-      const data = await res.json();
-      if(data?.data?.[0]?.url) return {type:"image", src: data.data[0].url};
-      else return "⚠️ Could not generate image.";
-    } catch(e){return "⚠️ Error contacting AI server.";}
+  if(/^[0-9+\-*/().\sx÷]+$/.test(text)){
+    let mathText = text.replace(/x/g,"*").replace(/÷/g,"/");
+    try{return String(Function("return "+mathText)());}catch{}
   }
-  let mathText = text.replace(/(\d)\s*x\s*(\d)/gi,"$1*$2").replace(/÷/g,"/");
-  if(/^[0-9+\-*/().\s]+$/.test(mathText)){try{return String(Function("return "+mathText)());}catch{}}
   if(t==="hi"||t==="hello") return "Hey";
   return "Got it.";
 }
@@ -209,17 +167,16 @@ async function send(){
   const text = input.value.trim();
   if(!text) return;
   input.value = "";
-  addMessage(text, "user");
+  addMessage(text,"user");
   const typing = showTyping();
-  setTimeout(async ()=>{
-    typing.remove();
-    const reply = await aiResponse(text);
-    addMessage(reply,"ai");
-    if(voiceEnabled && typeof reply==="string") speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
-  },3000+Math.random()*2000);
+  await new Promise(r=>setTimeout(r,3000)); // 3 sec thinking
+  const reply = await aiResponse(text);
+  typing.remove();
+  addMessage(reply,"ai");
+  if(voiceEnabled && typeof reply==="string"){speechSynthesis.speak(new SpeechSynthesisUtterance(reply));}
 }
 
-input.addEventListener("keydown", e=>{if(e.key==="Enter") send();});
+input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
 
 function startVoice(){
   const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
@@ -227,25 +184,50 @@ function startVoice(){
   rec.start();
 }
 
-/* Projects */
+// Projects
 function addProject(){
-  let name = prompt("Project name:");
+  const name = prompt("Project name:");
   if(!name) return;
-  const proj = {name:name, messages:[]};
-  projects.push(proj);
-  saveProjects();
+  projects.push({name: name, messages: []});
+  localStorage.setItem("projects", JSON.stringify(projects));
+  renderProjects();
 }
-function switchProject(index){
-  activeProjectIndex = index;
+function renderProjects(){
+  const existing = document.querySelectorAll(".project-btn");
+  existing.forEach(b=>b.remove());
+  projects.forEach((p,i)=>{
+    const btn = document.createElement("button");
+    btn.className="project-btn";
+    btn.textContent="📁 "+p.name;
+    btn.onclick=()=>loadProject(i);
+    document.getElementById("sidebar").appendChild(btn);
+  });
+}
+function loadProject(i){
   clearChat();
-  projects[index].messages.forEach(m=>addMessage(m.content,m.who));
+  projects[i].messages.forEach(m=>addMessage(m.content,m.who));
+  currentProject=i;
+}
+let currentProject = null;
+
+// Save chat messages per project
+function saveProjectMessage(content,who){
+  if(currentProject!==null){projects[currentProject].messages.push({content,who}); localStorage.setItem("projects",JSON.stringify(projects));}
 }
 
-/* Mobile check */
-window.onload = ()=>{
-  let choice = prompt("Mobile or PC? Type 'mobile' or 'pc'").toLowerCase();
-  if(choice==="mobile"){document.body.classList.add("mobile");}
+// Override addMessage to save per project
+const oldAddMessage = addMessage;
+addMessage = function(content,who){
+  oldAddMessage(content,who);
+  saveProjectMessage(content,who);
 }
+
+// Mobile / PC prompt
+window.addEventListener("load",()=>{
+  let device = prompt("Are you using a mobile device? Type 'yes' or 'no'");
+  if(device && device.toLowerCase()==="yes"){document.body.classList.add("mobile");}
+  renderProjects();
+});
 </script>
 </body>
 </html>
