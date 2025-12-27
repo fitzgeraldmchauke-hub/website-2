@@ -18,19 +18,20 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 .user {align-self:flex-end; background:#2e6cff;}
 .ai {align-self:flex-start; background:#2a2a2a;}
 .msg img {max-width:100%; border-radius:12px; margin-top:6px;}
-.typing {font-size:28px; letter-spacing:6px; animation:blink 1.4s infinite;}
-@keyframes blink {0% {opacity:.2;} 20% {opacity:1;} 100% {opacity:.2;}}
+.typing {font-size:28px; letter-spacing:6px;}
 #input-area {display:flex; gap:8px; padding:10px; background:#111;}
 #input {flex:1; padding:10px; border-radius:10px; border:none; background:#222; color:white;}
 #send {width:44px; height:44px; border-radius:50%; border:none; background:#2e6cff; color:white; font-size:18px; cursor:pointer;}
 .popup {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e1e1e; padding:16px; border-radius:12px; display:none; width:280px; z-index:100;}
 .popup button {width:100%; margin-top:8px;}
-#profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto; transition: all 1s ease;}
+#profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto; transition: transform 2s ease, opacity 2s ease;}
 #motherBtn {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:red; display:none; cursor:pointer; z-index:200;}
 #profileRing {border:5px solid gold; border-radius:50%; display:none; width:80px; height:80px; position:absolute; top:8px; left:8px;}
 .project-list {margin-top:12px; width:100%; display:flex; flex-direction:column; gap:4px;}
 .project-btn {background:#2a2a2a; color:white; border:none; border-radius:8px; padding:6px; cursor:pointer; text-align:left;}
 .project-btn:hover {background:#444;}
+@keyframes blink {0% {opacity:.2;} 50% {opacity:1;} 100% {opacity:.2;}}
+.typing-dots span {animation: blink 1s infinite; margin-right:4px;}
 </style>
 </head>
 <body>
@@ -84,28 +85,28 @@ body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; ba
 <div id="motherBtn" onclick="clickMother()">Mother</div>
 
 <script>
-let messages = document.getElementById("messages");
-let input = document.getElementById("input");
-let chatBtn = document.getElementById("chatBtn");
-let imgBtn = document.getElementById("imgBtn");
-let motherBtn = document.getElementById("motherBtn");
-let profilePic = document.getElementById("profilePic");
-let profileRing = document.getElementById("profileRing");
-let voiceBtn = document.getElementById("voiceBtn");
-let projectList = document.getElementById("projectList");
+let messages=document.getElementById("messages");
+let input=document.getElementById("input");
+let chatBtn=document.getElementById("chatBtn");
+let imgBtn=document.getElementById("imgBtn");
+let motherBtn=document.getElementById("motherBtn");
+let profilePic=document.getElementById("profilePic");
+let profileRing=document.getElementById("profileRing");
+let voiceBtn=document.getElementById("voiceBtn");
+let projectList=document.getElementById("projectList");
 
-let voiceEnabled = true;
-let clickCount = 0;
-let username = localStorage.getItem("username")||"";
-let password = localStorage.getItem("password")||"";
-let age = parseInt(localStorage.getItem("age"))||0;
-let imageHistory = [];
-let projects = JSON.parse(localStorage.getItem("projects")||"[]");
-let currentProject = null;
+let voiceEnabled=true;
+let clickCount=0;
+let username=localStorage.getItem("username")||"";
+let password=localStorage.getItem("password")||"";
+let age=parseInt(localStorage.getItem("age"))||0;
+let imageHistory=[];
+let projects=JSON.parse(localStorage.getItem("projects")||"[]");
+let currentProject=null;
 
-function saveProjects(){localStorage.setItem("projects", JSON.stringify(projects));}
+function saveProjects(){localStorage.setItem("projects",JSON.stringify(projects));}
 
-function addMessage(content, who){
+function addMessage(content,who){
   const div=document.createElement("div");
   div.className="msg "+who;
   if(content && typeof content==="object" && content.type==="image"){const img=document.createElement("img"); img.src=content.src; div.appendChild(img); imageHistory.push(content.src);} 
@@ -114,19 +115,29 @@ function addMessage(content, who){
   messages.scrollTop=messages.scrollHeight;
 }
 
-function showTyping(){const d=document.createElement("div"); d.className="msg ai typing"; d.textContent="..."; messages.appendChild(d); return d;}
+function showTypingDots(){
+  const d=document.createElement("div");
+  d.className="msg ai typing";
+  const spanContainer=document.createElement("span");
+  spanContainer.className="typing-dots";
+  spanContainer.innerHTML="<span>.</span><span>.</span><span>.</span>";
+  d.appendChild(spanContainer);
+  messages.appendChild(d);
+  messages.scrollTop=messages.scrollHeight;
+  return d;
+}
 
 function clearChat(){messages.innerHTML="";}
 function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
 function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;}
+function toggleVoice(){voiceEnabled=!voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
 function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
 function openPeople(){document.getElementById("peoplePopup").style.display="block";}
 function openProfile(){document.getElementById("profilePopup").style.display="block";}
 function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
 function uploadAvatar(){
   if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
-  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);profilePic.dataset.avatar = URL.createObjectURL(file);};f.click();}
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);profilePic.dataset.avatar=URL.createObjectURL(file);};f.click();}
 }
 
 function login(){
@@ -143,14 +154,20 @@ function logout(){username=""; password=""; age=0; localStorage.removeItem("user
 
 function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
+// Cinematic disintegration
 function disintegrateAvatar(){
-  profilePic.style.transition="all 1s ease";
-  profilePic.style.transform="scale(0) rotate(720deg)";
+  profilePic.style.transition="transform 2s ease, opacity 2s ease";
+  profilePic.style.transform="scale(0) rotate(1080deg)";
   profilePic.style.opacity="0";
-  setTimeout(()=>{profilePic.src=""; profilePic.style.transform="scale(1) rotate(0deg)"; profilePic.style.opacity="1";},1500);
+  setTimeout(()=>{
+    profilePic.src="";
+    profilePic.style.transform="scale(1) rotate(0deg)";
+    profilePic.style.opacity="1";
+    if(profilePic.dataset.avatar) profilePic.src=profilePic.dataset.avatar;
+  },2000);
 }
 
-// Load projects
+// Projects
 function renderProjects(){
   projectList.innerHTML="";
   projects.forEach((p,i)=>{
@@ -170,7 +187,6 @@ function addProject(){
   renderProjects();
 }
 
-// Load project chat
 function loadProject(){
   if(currentProject===null) return;
   messages.innerHTML="";
@@ -185,45 +201,21 @@ function saveProjectMessages(){
   saveProjects();
 }
 
-// AI + Math + Roblox + Minecraft
+// AI
 async function aiResponse(text){
   let t=text.toLowerCase().trim();
-  // Rick roll secret
   if(t==="doodledog6767") return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-
-  // Math: x=* , ÷=/
   let mathText=t.replace(/(\d)\s*x\s*(\d|\()/gi,"$1*$2").replace(/÷/g,"/");
   if(/^[0-9+\-*/().\s]+$/.test(mathText)){
-    // thinking delay 3-5s
     await new Promise(r=>setTimeout(r,3000+Math.random()*2000));
     try{return String(Function("return "+mathText)());}catch{return "Math error";}
   }
-
-  // Simple slang
   let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
   if(slang[t]) return slang[t];
-
-  // Roblox/Minecraft/code recognition (dummy)
   if(t.includes("roblox")||t.includes("minecraft")||t.includes("script")||t.includes("command")){
     await new Promise(r=>setTimeout(r,3000+Math.random()*2000));
     return `I understood your ${t.includes("roblox")?"Roblox":t.includes("minecraft")?"Minecraft":"code"} request! ✅`;
   }
-
-  // Images
-  let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim()||"art";
-    try{
-      const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prompt: subject})
-      });
-      const data=await res.json();
-      if(data?.data?.[0]?.url) return {type:"image", src:data.data[0].url};
-      return "⚠️ Could not generate image.";
-    }catch{return "⚠️ Image server offline";}
-  }
-
-  // Fallback
   await new Promise(r=>setTimeout(r,2000+Math.random()*3000));
   if(t==="hi"||t==="hello") return "Hey!";
   return "Got it.";
@@ -235,7 +227,7 @@ async function send(){
   input.value="";
   addMessage(text,"user");
   if(currentProject!==null){projects[currentProject].messages.push({content:text,who:"user"}); saveProjects();}
-  const typing=showTyping();
+  const typing=showTypingDots();
   const reply=await aiResponse(text);
   typing.remove();
   if(reply && typeof reply==="object" && reply.type==="image"){addMessage(reply,"ai");}
