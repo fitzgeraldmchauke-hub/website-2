@@ -2,95 +2,244 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>four.gb</title>
 <style>
-* { box-sizing: border-box; font-family: system-ui, sans-serif; }
-body { margin: 0; background: #0f0f0f; color: white; display: flex; height: 100vh; overflow: hidden; }
-.sidebar { width: 240px; background: #141414; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.logo { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
-.avatar { width: 80px; height: 80px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; cursor: pointer; }
-.btn { padding: 10px; border-radius: 8px; background: #222; cursor: pointer; user-select: none; text-align: center; }
-.btn.active { background: #2f6cff; }
-.projects-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-.project-item { padding: 8px; border-radius: 6px; background: #1e1e1e; cursor: pointer; }
-.project-item.active { background: #2f6cff; }
-.main { flex: 1; display: flex; flex-direction: column; }
-.topbar { padding: 10px; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
-.chat { flex: 1; padding: 20px; overflow-y: auto; }
-.message { margin-bottom: 12px; word-break: break-word; }
-.inputbar { display: flex; padding: 10px; gap: 10px; }
-input { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; background: #222; color: white; }
-.send { width: 44px; height: 44px; border-radius: 50%; background: #2f6cff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
-@media (max-width: 768px) { .sidebar { width: 60px; padding: 6px; } .logo { display: none; } .btn { padding: 6px; font-size: 12px; } }
+  * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+  body {
+    margin: 0;
+    background: #0f0f0f;
+    color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #141414;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+
+  .btn {
+    padding: 10px;
+    border-radius: 8px;
+    background: #222;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .btn.active {
+    background: #2f6cff;
+  }
+
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .project-item {
+    padding: 8px;
+    border-radius: 6px;
+    background: #1e1e1e;
+    cursor: pointer;
+  }
+
+  .project-item.active {
+    background: #2f6cff;
+  }
+
+  /* Main */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .chat {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .message {
+    margin-bottom: 12px;
+  }
+
+  .inputbar {
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    background: #222;
+    color: white;
+  }
+
+  .send {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2f6cff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+  }
 </style>
 </head>
+
 <body>
+<!-- SIDEBAR -->
 <div class="sidebar">
   <div class="logo">four.gb</div>
+
   <div class="avatar">Upload<br>avatar</div>
+
   <div class="btn active">💬 Chat</div>
   <div class="btn">🖼 Images</div>
   <div class="btn">🧹 Clear</div>
   <div class="btn">🎤 Voice ON</div>
   <div class="btn">👤 Profile</div>
-  <div class="btn homework">📚 Homework Mode</div>
+
+  <!-- Homework Mode -->
+  <div class="btn" id="homeworkModeBtn">📚 Homework Mode</div>
+
   <div class="btn" id="addProjectBtn">📁 Projects</div>
   <div class="projects-list" id="projectsList"></div>
 </div>
+
+<!-- MAIN -->
 <div class="main">
   <div class="topbar">
     <div class="btn">🔗 Share</div>
     <div class="btn">➕ Add</div>
     <div class="btn">🎙 Talk</div>
   </div>
+
   <div class="chat" id="chat"></div>
+
   <div class="inputbar">
     <input id="input" placeholder="Ask anything..." />
     <div class="send" id="sendBtn">➤</div>
   </div>
 </div>
-<script>
-let username = prompt("Enter your name:") || "Guest";
-let data = JSON.parse(localStorage.getItem("fourgb_" + username)) || { projects: { "Default": [] }, current: "Default" };
-let homeworkMode = false;
 
+<script>
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const projectsList = document.getElementById("projectsList");
 const addProjectBtn = document.getElementById("addProjectBtn");
-const homeworkBtn = document.querySelector(".btn.homework");
+const homeworkModeBtn = document.getElementById("homeworkModeBtn");
+
+let data = JSON.parse(localStorage.getItem("fourgb")) || {
+  projects: { "Default": [] },
+  current: "Default"
+};
+
+let homeworkMode = false;
 
 function save() {
-    localStorage.setItem("fourgb_" + username, JSON.stringify(data));
+  localStorage.setItem("fourgb", JSON.stringify(data));
 }
 
 function renderProjects() {
-    projectsList.innerHTML = "";
-    Object.keys(data.projects).forEach(name => {
-        const div = document.createElement("div");
-        div.className = "project-item" + (name === data.current ? " active" : "");
-        div.textContent = name;
-        div.onclick = () => {
-            data.current = name;
-            renderProjects();
-            renderChat();
-            save();
-        };
-        projectsList.appendChild(div);
-    });
+  projectsList.innerHTML = "";
+  Object.keys(data.projects).forEach(name => {
+    const div = document.createElement("div");
+    div.className = "project-item" + (name === data.current ? " active" : "");
+    div.textContent = name;
+    div.onclick = () => {
+      data.current = name;
+      renderProjects();
+      renderChat();
+      save();
+    };
+    projectsList.appendChild(div);
+  });
 }
 
 function renderChat() {
-    chat.innerHTML = "";
-    data.projects[data.current].forEach(m => {
-        const div = document.createElement("div");
-        div.className = "message";
-        div.textContent = m;
-        chat.appendChild(div);
-    });
-    chat.scrollTop = chat.scrollHeight;
+  chat.innerHTML = "";
+  data.projects[data.current].forEach(m => {
+    const div = document.createElement("div");
+    div.className = "message";
+    div.textContent = m;
+    chat.appendChild(div);
+  });
+  chat.scrollTop = chat.scrollHeight;
 }
 
-func
+function send() {
+  if (!input.value.trim()) return;
+  data.projects[data.current].push("You: " + input.value);
+  input.value = "";
+  renderChat();
+  save();
+}
+
+sendBtn.onclick = send;
+input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+
+addProjectBtn.onclick = () => {
+  const name = prompt("Project name?");
+  if (!name || data.projects[name]) return;
+  data.projects[name] = [];
+  data.current = name;
+  renderProjects();
+  renderChat();
+  save();
+};
+
+// Homework Mode toggle
+homeworkModeBtn.onclick = () => {
+  homeworkMode = !homeworkMode;
+  homeworkModeBtn.classList.toggle("active", homeworkMode);
+  alert("Homework Mode " + (homeworkMode ? "ON" : "OFF"));
+  // Here you can add AI behavior changes for homework mode
+};
+
+renderProjects();
+renderChat();
+</script>
+</body>
+</html>
