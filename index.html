@@ -23,9 +23,9 @@ body{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:8px;
+  gap:6px;
 }
-#sidebar h2{margin:8px 0;}
+#sidebar h2{margin:6px 0;}
 #sidebar button{
   width:100%;
   padding:10px;
@@ -36,6 +36,7 @@ body{
   cursor:pointer;
 }
 #sidebar button:hover{background:#444}
+#sidebar button.active{background:#2e6cff}
 
 /* AVATAR */
 #profilePic{
@@ -45,6 +46,7 @@ body{
   background:#333;
   object-fit:cover;
   cursor:pointer;
+  margin-bottom:6px;
 }
 
 /* MAIN */
@@ -136,19 +138,27 @@ body{
 
 <body>
 
+<!-- SIDEBAR -->
 <div id="sidebar">
   <h2>four.gb</h2>
   <img id="profilePic" title="Upload avatar">
-  <button onclick="newProject()">➕ Project</button>
-  <button onclick="pickProject()">📂 Projects</button>
-  <button onclick="openProfile()">👤 Profile</button>
+
+  <button id="chatBtn" class="active" onclick="showChat()">Chat</button>
+  <button id="imgBtn" onclick="showImages()">Images</button>
+  <button onclick="clearChat()">Clear</button>
+
+  <button onclick="newProject()">New Project</button>
+  <button onclick="pickProject()">Projects</button>
+
+  <button onclick="openProfile()">Profile</button>
 </div>
 
+<!-- MAIN -->
 <div id="main">
   <div id="topbar">
-    <button onclick="addUser()">👥 Add</button>
-    <button onclick="share()">🔗 Share</button>
-    <button onclick="talk()">🎤 Talk</button>
+    <button onclick="addUser()">Add</button>
+    <button onclick="share()">Share</button>
+    <button onclick="talk()">Talk</button>
   </div>
 
   <div id="messages"></div>
@@ -178,6 +188,8 @@ let avatar = localStorage.getItem("avatar") || "";
 const messages = document.getElementById("messages");
 const input = document.getElementById("input");
 const profilePic = document.getElementById("profilePic");
+const chatBtn = document.getElementById("chatBtn");
+const imgBtn = document.getElementById("imgBtn");
 
 /* ================= INIT ================= */
 if(!currentProject){
@@ -186,6 +198,18 @@ if(!currentProject){
   openProject(currentProject);
 }
 if(avatar) profilePic.src = avatar;
+
+/* ================= SIDEBAR MODES ================= */
+function showChat(){
+  chatBtn.classList.add("active");
+  imgBtn.classList.remove("active");
+  openProject(currentProject);
+}
+function showImages(){
+  chatBtn.classList.remove("active");
+  imgBtn.classList.add("active");
+  messages.innerHTML="";
+}
 
 /* ================= PROJECTS ================= */
 function saveProjects(){
@@ -211,6 +235,12 @@ function openProject(name){
   currentProject=name;
   messages.innerHTML="";
   projects[name].forEach(m=>renderMessage(m.text,m.who));
+  saveProjects();
+}
+
+function clearChat(){
+  projects[currentProject]=[];
+  messages.innerHTML="";
   saveProjects();
 }
 
@@ -258,9 +288,6 @@ function aiReply(t){
     if(!isNaN(a)&&!isNaN(b))
       return a>b?"First is bigger":b>a?"Second is bigger":"Equal";
   }
-
-  if(s.includes("what is war"))
-    return "War is organized armed conflict between states or groups.";
 
   return "I understand.";
 }
@@ -312,18 +339,15 @@ function uploadAvatar(){
 function openProfile(){
   document.getElementById("profilePopup").style.display="block";
 }
-
 function closePopups(){
   document.querySelectorAll(".popup").forEach(p=>p.style.display="none");
 }
-
 function login(){
   username=document.getElementById("usernameInput").value.trim();
   if(!username) return;
   localStorage.setItem("username",username);
   closePopups();
 }
-
 function logout(){
   localStorage.clear();
   location.reload();
