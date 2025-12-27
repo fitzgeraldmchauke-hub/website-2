@@ -9,6 +9,10 @@ body {margin:0;font-family:system-ui,sans-serif;display:flex;height:100vh;backgr
 #sidebar h2 {margin:8px 0;}
 #sidebar button {margin:4px 0;padding:10px;border:none;border-radius:8px;background:#2a2a2a;color:white;cursor:pointer;width:90%;}
 #sidebar button.active {background:#2e6cff;}
+#projects {width:100%;margin-top:10px;overflow-y:auto;max-height:300px;}
+.project {padding:6px;border-radius:6px;background:#2a2a2a;margin:4px 0;cursor:pointer;}
+.project.active {background:#2e6cff;}
+
 #main {flex:1;display:flex;flex-direction:column;}
 #topbar {height:48px;background:#121212;display:flex;justify-content:flex-end;gap:10px;padding:0 12px;align-items:center;}
 #topbar button {background:#2a2a2a;border:none;border-radius:8px;color:white;padding:6px 10px;}
@@ -19,38 +23,34 @@ body {margin:0;font-family:system-ui,sans-serif;display:flex;height:100vh;backgr
 #input-area {display:flex;gap:8px;padding:10px;background:#111;}
 #input {flex:1;padding:10px;border-radius:10px;border:none;background:#222;color:white;}
 #send {width:44px;height:44px;border-radius:50%;border:none;background:#2e6cff;color:white;font-size:18px;cursor:pointer;}
-#projects {width:100%;margin-top:10px;max-height:300px;overflow-y:auto;}
-.project {padding:6px;border-radius:6px;background:#2a2a2a;margin:4px 0;cursor:pointer;}
-.project.active {background:#2e6cff;}
 </style>
 </head>
+
 <body>
 
 <div id="sidebar">
-<h2>four.gb</h2>
-<button id="chatBtn" class="active">💬 Chat</button>
-<button id="imgBtn">🖼️ Images</button>
-<button onclick="newProject()">➕ Project</button>
-<div id="projects"></div>
+  <h2>four.gb</h2>
+  <button onclick="newProject()">➕ Project</button>
+  <div id="projects"></div>
 </div>
 
 <div id="main">
-<div id="topbar">
-<button>🔗 Share</button>
-<button>👥 Add</button>
-<button>🎤 Talk</button>
-</div>
+  <div id="topbar">
+    <button>🔗 Share</button>
+    <button>👥 Add</button>
+    <button>🎤 Talk</button>
+  </div>
 
-<div id="messages"></div>
+  <div id="messages"></div>
 
-<div id="input-area">
-<input id="input" placeholder="Ask anything…" />
-<button id="send" onclick="send()">➤</button>
-</div>
+  <div id="input-area">
+    <input id="input" placeholder="Ask anything…" />
+    <button id="send" onclick="send()">➤</button>
+  </div>
 </div>
 
 <script>
-/* ================== PROJECT SYSTEM ================== */
+/* ================= PROJECT SYSTEM ================= */
 let projects = {};
 let currentProject = null;
 
@@ -80,11 +80,13 @@ function renderProjects(){
 function openProject(name){
   currentProject=name;
   messages.innerHTML="";
-  projects[name].forEach(m=>renderMessage(m.text,m.who));
+  projects[name].forEach(m=>{
+    renderMessage(m.text,m.who);
+  });
   renderProjects();
 }
 
-/* ================== CHAT ================== */
+/* ================= CHAT ================= */
 function renderMessage(text,who){
   const div=document.createElement("div");
   div.className="msg "+who;
@@ -94,21 +96,26 @@ function renderMessage(text,who){
 }
 
 function addMessage(text,who){
+  if(!projects[currentProject]) return;
+
+  const last = projects[currentProject].at(-1);
+  if(last && last.text===text && last.who===who) return;
+
   projects[currentProject].push({text,who});
   renderMessage(text,who);
 }
 
-/* ================== SMART AI ================== */
+/* ================= AI ================= */
 function parseBigNumber(str){
   const map={
     thousand:1e3,million:1e6,billion:1e9,trillion:1e12,
     quadrillion:1e15,quintillion:1e18,sextillion:1e21
   };
-  let s=str.toLowerCase().replace(/,/g,"").trim();
-  let match=s.match(/([\d.]+)\s*(thousand|million|billion|trillion|quadrillion|quintillion|sextillion)?/);
-  if(!match) return NaN;
-  let n=parseFloat(match[1]);
-  if(match[2]) n*=map[match[2]];
+  let s=str.toLowerCase().replace(/,/g,"");
+  let m=s.match(/([\d.]+)\s*(thousand|million|billion|trillion|quadrillion|quintillion|sextillion)?/);
+  if(!m) return NaN;
+  let n=parseFloat(m[1]);
+  if(m[2]) n*=map[m[2]];
   return n;
 }
 
@@ -119,7 +126,7 @@ function aiReply(text){
     return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
   }
 
-  // math (x means multiply)
+  // math (x multiply)
   let math=t.replace(/(\d)\s*x\s*(\d)/g,"$1*$2");
   if(/^[\d+\-*/().\s]+$/.test(math)){
     try{return String(Function("return "+math)());}catch{}
@@ -127,31 +134,24 @@ function aiReply(text){
 
   // comparisons
   if(t.includes("what is bigger")){
-    let parts=t.split("bigger than");
-    if(parts.length===2){
-      let a=parseBigNumber(parts[0]);
-      let b=parseBigNumber(parts[1]);
+    let p=t.split("bigger than");
+    if(p.length===2){
+      let a=parseBigNumber(p[0]);
+      let b=parseBigNumber(p[1]);
       if(!isNaN(a)&&!isNaN(b)){
-        return a>b ? "The first number is bigger." :
-               b>a ? "The second number is bigger." :
-               "They are equal.";
+        return a>b?"The first is bigger.":b>a?"The second is bigger.":"They are equal.";
       }
     }
   }
 
-  // knowledge
   if(t.includes("what is war")){
-    return "War is an armed conflict between groups, usually states, involving violence, strategy, and political goals.";
+    return "War is an armed conflict between groups or countries involving violence and political goals.";
   }
 
-  if(t.includes("who are you")){
-    return "I’m four.gb — a local project-based AI chat.";
-  }
-
-  return "I understand. Tell me more.";
+  return "I understand. Ask me more.";
 }
 
-/* ================== SEND (FIXED) ================== */
+/* ================= SEND ================= */
 function send(){
   if(!currentProject){
     alert("Create or select a project first.");
@@ -167,7 +167,7 @@ function send(){
   },3000);
 }
 
-/* ✅ ENTER KEY FIX */
+/* ENTER KEY FIX */
 input.addEventListener("keydown",e=>{
   if(e.key==="Enter"){
     e.preventDefault();
