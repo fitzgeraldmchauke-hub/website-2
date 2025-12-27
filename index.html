@@ -44,25 +44,24 @@ if(isMobile) document.body.classList.add("mobile");
 <h2>four.gb</h2>
 <img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
 <div id="profileRing"></div>
-<button id="chatBtn" class="active" onclick="showChat()">💬 Chat</button>
-<button id="imgBtn" onclick="showImages()">🖼️ Images</button>
-<button onclick="clearChat()">🧹 Clear</button>
-<button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
-<button onclick="openProfile()">👤 Profile</button>
-<button id="projectsBtn" onclick="addProject()">📁 Projects</button>
+<button id="chatBtn" class="active">💬 Chat</button>
+<button id="imgBtn">🖼️ Images</button>
+<button id="clearBtn">🧹 Clear</button>
+<button id="voiceBtn">🎙️ Voice ON</button>
+<button id="profileBtn">👤 Profile</button>
+<button id="projectsBtn">📁 Projects</button>
 </div>
 
 <div id="main">
 <div id="input-area">
 <input id="input" placeholder="Ask anything…" />
-<button id="send" onclick="send()">▶</button>
+<button id="send">▶</button>
 </div>
 <div id="topbar">
-<button onclick="openShare()">🔗 Share</button>
-<button onclick="openPeople()">👥 Add</button>
-<button onclick="startVoice()">🎤 Talk</button>
+<button id="shareBtn">🔗 Share</button>
+<button id="addBtn">👥 Add</button>
+<button id="talkBtn">🎤 Talk</button>
 </div>
-
 <div id="messages"></div>
 </div>
 
@@ -79,8 +78,8 @@ if(isMobile) document.body.classList.add("mobile");
 <input id="usernameInput" placeholder="Username" />
 <input id="passwordInput" type="password" placeholder="Password" />
 <input id="ageInput" type="number" placeholder="Age 10-100" />
-<button onclick="login()">Login / Set</button>
-<button onclick="logout()">Logout</button>
+<button id="loginBtn">Login / Set</button>
+<button id="logoutBtn">Logout</button>
 <button onclick="closePopups()">Close</button>
 </div>
 
@@ -92,11 +91,17 @@ let messages = document.getElementById("messages");
 let input = document.getElementById("input");
 let chatBtn = document.getElementById("chatBtn");
 let imgBtn = document.getElementById("imgBtn");
+let clearBtn = document.getElementById("clearBtn");
+let voiceBtn = document.getElementById("voiceBtn");
+let profileBtn = document.getElementById("profileBtn");
+let shareBtn = document.getElementById("shareBtn");
+let addBtn = document.getElementById("addBtn");
+let talkBtn = document.getElementById("talkBtn");
+let sendBtn = document.getElementById("send");
+let projectsBtn = document.getElementById("projectsBtn");
 let motherBtn = document.getElementById("motherBtn");
 let profilePic = document.getElementById("profilePic");
 let profileRing = document.getElementById("profileRing");
-let voiceBtn = document.getElementById("voiceBtn");
-let projectsBtn = document.getElementById("projectsBtn");
 
 let voiceEnabled = true;
 let clickCount = 0;
@@ -107,103 +112,41 @@ let imageHistory = [];
 let projects = JSON.parse(localStorage.getItem("projects")||"[]");
 let currentProject = "default";
 
-// Helper functions
+// Save/load projects
 function saveProjects(){localStorage.setItem("projects", JSON.stringify(projects));}
 function loadProjects(){
   projects.forEach(p=>{
     let btn = document.createElement("button");
-    btn.textContent = p;
+    btn.textContent=p;
     btn.onclick = ()=>{currentProject=p; loadChat(p);};
     document.getElementById("sidebar").appendChild(btn);
   });
 }
-function loadChat(p){
-  messages.innerHTML = localStorage.getItem("chat_"+p)||"";
-}
+function loadChat(p){messages.innerHTML = localStorage.getItem("chat_"+p)||"";}
 
-// Chat functions
+// Sidebar buttons
+chatBtn.onclick = ()=>{chatBtn.classList.add("active"); imgBtn.classList.remove("active"); clearChat();}
+imgBtn.onclick = ()=>{imgBtn.classList.add("active"); chatBtn.classList.remove("active"); clearChat(); imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
+clearBtn.onclick = ()=>{clearChat();}
+voiceBtn.onclick = ()=>{voiceEnabled=!voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
+profileBtn.onclick = ()=>{openProfile();}
+projectsBtn.onclick = ()=>{addProject();}
+
+// Topbar buttons
+shareBtn.onclick = ()=>{navigator.clipboard.writeText(location.href); document.getElementById("sharePopup").style.display="block";}
+addBtn.onclick = ()=>{document.getElementById("peoplePopup").style.display="block";}
+talkBtn.onclick = ()=>{startVoice();}
+
+// Chat system
 function addMessage(content, who){
-  const div = document.createElement("div");
-  div.className="msg "+who;
-  if(content && typeof content==="object" && content.type==="image"){
-    const img = document.createElement("img");
-    img.src = content.src;
-    div.appendChild(img);
-    imageHistory.push(content.src);
-  } else div.textContent = content;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-  // Save chat
-  localStorage.setItem("chat_"+currentProject, messages.innerHTML);
+  const div=document.createElement("div"); div.className="msg "+who;
+  if(content && typeof content==="object" && content.type==="image"){ const img=document.createElement("img"); img.src=content.src; div.appendChild(img); imageHistory.push(content.src); }
+  else div.textContent=content;
+  messages.appendChild(div); messages.scrollTop=messages.scrollHeight;
+  localStorage.setItem("chat_"+currentProject,messages.innerHTML);
 }
-
 function showTyping(){const d=document.createElement("div"); d.className="msg ai typing"; d.textContent="..."; messages.appendChild(d); return d;}
 function clearChat(){messages.innerHTML=""; localStorage.setItem("chat_"+currentProject,"");}
-function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
-function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
-function toggleVoice(){voiceEnabled = !voiceEnabled; voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"`;}
-function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
-function openPeople(){document.getElementById("peoplePopup").style.display="block";}
-function openProfile(){document.getElementById("profilePopup").style.display="block";}
-function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
-function uploadAvatar(){
-  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
-  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
-}
-function login(){
-  let u=document.getElementById("usernameInput").value.trim();
-  let p=document.getElementById("passwordInput").value.trim();
-  let a=parseInt(document.getElementById("ageInput").value);
-  if(a<10||a>100){alert("Age must be 10-100"); return;}
-  username=u; password=p; age=a;
-  localStorage.setItem("username",u); localStorage.setItem("password",p); localStorage.setItem("age",a);
-  closePopups();
-}
-function logout(){username="";password="";age=0; localStorage.removeItem("username"); localStorage.removeItem("password"); localStorage.removeItem("age");}
-
-function clickMother(){clickCount++; if(clickCount>=100){profileRing.style.display="block"; alert("Decorative ring unlocked!"); clickCount=0;}}
-
-// AI + Math + Images
-async function aiResponse(text){
-  let t=text.toLowerCase().trim();
-  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
-  if(slang[t]) return slang[t];
-  let imgWords=["draw","create","image","picture","make"];
-  if(imgWords.some(w=>t.startsWith(w))){
-    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
-    if(!subject) subject="art";
-    try{
-      const res = await fetch('http://localhost:3000/generate-image',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({prompt: subject})
-      });
-      const data = await res.json();
-      if(data?.data?.[0]?.url){ return {type:"image",src:data.data[0].url}; }
-      else return "⚠️ Could not generate image.";
-    } catch{return "⚠️ Error contacting AI server";}
-  }
-  // Math evaluation with 5-second delay
-  if(/^[0-9+\-*/().\s]+$/.test(text)){
-    await new Promise(r=>setTimeout(r,5000));
-    try{return String(Function("return "+text)());}catch{}
-  }
-  if(t==="hi"||t==="hello") return "Hey";
-  return "Got it.";
-}
-
-async function send(){
-  const text=input.value.trim(); if(!text) return; input.value="";
-  addMessage(text,"user");
-  const typing = showTyping();
-  const reply = await aiResponse(text);
-  typing.remove();
-  if(reply && typeof reply==="object" && reply.type==="image"){addMessage(reply,"ai");}
-  else {addMessage(reply,"ai"); if(voiceEnabled && typeof reply==="string"){speechSynthesis.speak(new SpeechSynthesisUtterance(reply));}}
-}
-input.addEventListener("keydown", e=>{if(e.key==="Enter") send();});
-function startVoice(){const rec=new (window.SpeechRecognition||webkitSpeechRecognition)(); rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}; rec.start();}
 
 // Projects
 function addProject(){
@@ -214,7 +157,40 @@ function addProject(){
   document.getElementById("sidebar").appendChild(btn);
 }
 
-// Load previous projects on startup
+// Profile & Mother button
+function uploadAvatar(){if(!username){alert("Login first!"); profilePic.style.display="none"; setTimeout(()=>{profilePic.style.display="block";},200);}
+else{const f=document.createElement("input"); f.type="file"; f.accept="image/*"; f.onchange=e=>{profilePic.src=URL.createObjectURL(e.target.files[0]);}; f.click();}}
+document.getElementById("loginBtn").onclick = ()=>{username=document.getElementById("usernameInput").value.trim(); password=document.getElementById("passwordInput").value.trim(); age=parseInt(document.getElementById("ageInput").value); localStorage.setItem("username",username); localStorage.setItem("password",password); localStorage.setItem("age",age); closePopups();}
+document.getElementById("logoutBtn").onclick = ()=>{username=""; password=""; age=0; localStorage.removeItem("username"); localStorage.removeItem("password"); localStorage.removeItem("age");}
+function clickMother(){clickCount++; if(clickCount>=100){profileRing.style.display="block"; alert("Decorative ring unlocked!"); clickCount=0;}}
+
+// AI + Math
+async function aiResponse(text){
+  let t=text.toLowerCase().trim();
+  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  let slang={"gtg":"Alright, later.","brb":"Okay.","lol":"Yeah","idk":"That’s fine.","fr":"For real."};
+  if(slang[t]) return slang[t];
+  let imgWords=["draw","create","image","picture","make"];
+  if(imgWords.some(w=>t.startsWith(w))){
+    let subject=t.replace(/^(draw|create|image|picture|make)\s+/,"").replace(/^of\s+/,"").trim();
+    if(!subject) subject="art";
+    try{ const res = await fetch('http://localhost:3000/generate-image',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({prompt: subject})}); const data = await res.json(); if(data?.data?.[0]?.url) return {type:"image",src:data.data[0].url}; else return "⚠️ Could not generate image."; } catch{return "⚠️ Error contacting AI server";}
+  }
+  if(/^[0-9+\-*/().\s]+$/.test(text)){ await new Promise(r=>setTimeout(r,5000)); try{return String(Function("return "+text)());}catch{}}
+  if(t==="hi"||t==="hello") return "Hey";
+  return "Got it.";
+}
+async function send(){
+  const text=input.value.trim(); if(!text) return; input.value="";
+  addMessage(text,"user"); const typing=showTyping();
+  const reply=await aiResponse(text); typing.remove();
+  if(reply && typeof reply==="object" && reply.type==="image"){addMessage(reply,"ai");} else{addMessage(reply,"ai"); if(voiceEnabled && typeof reply==="string"){speechSynthesis.speak(new SpeechSynthesisUtterance(reply));}}
+}
+sendBtn.onclick = send;
+input.addEventListener("keydown", e=>{if(e.key==="Enter") send();});
+function startVoice(){const rec=new (window.SpeechRecognition||webkitSpeechRecognition)(); rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}; rec.start();}
+
+// Load previous projects
 loadProjects();
 </script>
 </body>
