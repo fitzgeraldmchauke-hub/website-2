@@ -1,263 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>four.gb</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-* { box-sizing: border-box; }
+  * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+  body {
+    margin: 0;
+    background: #0f0f0f;
+    color: white;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
 
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #0f0f0f;
-  color: white;
-  height: 100vh;
-  display: flex;
-  overflow: hidden;
-}
+  /* Sidebar */
+  .sidebar {
+    width: 240px;
+    background: #141414;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 
-/* ===== DEVICE SELECT ===== */
-#deviceSelect {
-  position: fixed;
-  inset: 0;
-  background: #0f0f0f;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  gap: 20px;
-}
+  .logo {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
 
-.device-btn {
-  width: 220px;
-  padding: 16px;
-  font-size: 18px;
-  border-radius: 14px;
-  border: none;
-  cursor: pointer;
-  background: #2e6cff;
-  color: white;
-}
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
 
-/* ===== SIDEBAR ===== */
-#sidebar {
-  width: 220px;
-  background: #161616;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+  .btn {
+    padding: 10px;
+    border-radius: 8px;
+    background: #222;
+    cursor: pointer;
+    user-select: none;
+  }
 
-#sidebar h2 {
-  text-align: center;
-}
+  .btn.active {
+    background: #2f6cff;
+  }
 
-.sidebar-btn {
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  background: #2a2a2a;
-  color: white;
-  cursor: pointer;
-  font-size: 16px;
-}
+  .projects-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
 
-.sidebar-btn:hover {
-  background: #444;
-}
+  .project-item {
+    padding: 8px;
+    border-radius: 6px;
+    background: #1e1e1e;
+    cursor: pointer;
+  }
 
-/* ===== MAIN ===== */
-#main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
+  .project-item.active {
+    background: #2f6cff;
+  }
 
-/* ===== TOP BAR ===== */
-#topbar {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 10px;
-  background: #121212;
-}
+  /* Main */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
 
-.top-btn {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: none;
-  background: #2a2a2a;
-  color: white;
-  cursor: pointer;
-}
+  .topbar {
+    padding: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
 
-/* ===== CHAT ===== */
-#messages {
-  flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+  .chat {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
 
-.msg {
-  max-width: 75%;
-  padding: 10px 14px;
-  border-radius: 14px;
-}
+  .message {
+    margin-bottom: 12px;
+  }
 
-.user { align-self: flex-end; background: #2e6cff; }
-.ai { align-self: flex-start; background: #2a2a2a; }
+  .inputbar {
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+  }
 
-/* typing dots */
-.typing {
-  font-size: 26px;
-  letter-spacing: 4px;
-  animation: blink 1.4s infinite;
-}
-@keyframes blink {
-  0% { opacity: .2; }
-  20% { opacity: 1; }
-  100% { opacity: .2; }
-}
+  input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    background: #222;
+    color: white;
+  }
 
-/* ===== INPUT ===== */
-#inputArea {
-  display: flex;
-  gap: 10px;
-  padding: 10px;
-  background: #111;
-}
-
-#input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: #222;
-  color: white;
-  font-size: 16px;
-}
-
-#send {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  border: none;
-  background: #2e6cff;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* MOBILE MODE */
-.mobile #inputArea {
-  order: -1;
-}
+  .send {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2f6cff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+  }
 </style>
 </head>
 
 <body>
 
-<!-- DEVICE SELECT -->
-<div id="deviceSelect">
-  <h2>Choose your device</h2>
-  <button class="device-btn" onclick="setDevice('pc')">🖥️ PC</button>
-  <button class="device-btn" onclick="setDevice('mobile')">📱 Mobile</button>
-</div>
-
 <!-- SIDEBAR -->
-<div id="sidebar">
-  <h2>four.gb</h2>
-  <button class="sidebar-btn">💬 Chat</button>
-  <button class="sidebar-btn">🖼️ Images</button>
-  <button class="sidebar-btn">🧹 Clear</button>
-  <button class="sidebar-btn">🎙️ Voice</button>
-  <button class="sidebar-btn">👤 Profile</button>
+<div class="sidebar">
+  <div class="logo">four.gb</div>
+
+  <div class="avatar">Upload<br>avatar</div>
+
+  <div class="btn active">💬 Chat</div>
+  <div class="btn">🖼 Images</div>
+  <div class="btn">🧹 Clear</div>
+  <div class="btn">🎤 Voice ON</div>
+  <div class="btn">👤 Profile</div>
+
+  <div class="btn" id="addProjectBtn">📁 Projects</div>
+  <div class="projects-list" id="projectsList"></div>
 </div>
 
 <!-- MAIN -->
-<div id="main">
-  <div id="topbar">
-    <button class="top-btn">🔗 Share</button>
-    <button class="top-btn">👥 Add</button>
-    <button class="top-btn">🎤 Talk</button>
+<div class="main">
+  <div class="topbar">
+    <div class="btn">🔗 Share</div>
+    <div class="btn">➕ Add</div>
+    <div class="btn">🎙 Talk</div>
   </div>
 
-  <div id="messages"></div>
+  <div class="chat" id="chat"></div>
 
-  <div id="inputArea">
-    <input id="input" placeholder="Ask anything…" />
-    <button id="send">✈️</button>
+  <div class="inputbar">
+    <input id="input" placeholder="Ask anything..." />
+    <div class="send" id="sendBtn">➤</div>
   </div>
 </div>
 
 <script>
-const body = document.body;
-const deviceSelect = document.getElementById("deviceSelect");
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
-const sendBtn = document.getElementById("send");
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("input");
+  const sendBtn = document.getElementById("sendBtn");
+  const projectsList = document.getElementById("projectsList");
+  const addProjectBtn = document.getElementById("addProjectBtn");
 
-function setDevice(type) {
-  deviceSelect.style.display = "none";
-  if (type === "mobile") body.classList.add("mobile");
-}
+  let data = JSON.parse(localStorage.getItem("fourgb")) || {
+    projects: { "Default": [] },
+    current: "Default"
+  };
 
-function addMsg(text, who) {
-  const div = document.createElement("div");
-  div.className = "msg " + who;
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function showTyping() {
-  const d = document.createElement("div");
-  d.className = "msg ai typing";
-  d.textContent = "...";
-  messages.appendChild(d);
-  return d;
-}
-
-function smartReply(text) {
-  let t = text.toLowerCase()
-    .replace(/(\d)\s*x\s*(\d)/g, "$1*$2")
-    .replace(/÷/g, "/");
-
-  if (/^[0-9+\-*/().\s]+$/.test(t)) {
-    try { return String(Function("return " + t)()); }
-    catch { return "Math error"; }
+  function save() {
+    localStorage.setItem("fourgb", JSON.stringify(data));
   }
 
-  if (t.includes("what do you know")) {
-    return "I know math, words, logic, and I’m learning more step by step.";
+  function renderProjects() {
+    projectsList.innerHTML = "";
+    Object.keys(data.projects).forEach(name => {
+      const div = document.createElement("div");
+      div.className = "project-item" + (name === data.current ? " active" : "");
+      div.textContent = name;
+      div.onclick = () => {
+        data.current = name;
+        renderProjects();
+        renderChat();
+        save();
+      };
+      projectsList.appendChild(div);
+    });
   }
 
-  return "Got it.";
-}
+  function renderChat() {
+    chat.innerHTML = "";
+    data.projects[data.current].forEach(m => {
+      const div = document.createElement("div");
+      div.className = "message";
+      div.textContent = m;
+      chat.appendChild(div);
+    });
+    chat.scrollTop = chat.scrollHeight;
+  }
 
-function send() {
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-  addMsg(text, "user");
-  const typing = showTyping();
-  setTimeout(() => {
-    typing.remove();
-    addMsg(smartReply(text), "ai");
-  }, 1200);
-}
+  function send() {
+    if (!input.value.trim()) return;
+    data.projects[data.current].push("You: " + input.value);
+    input.value = "";
+    renderChat();
+    save();
+  }
 
-sendBtn.onclick = send;
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") send();
-});
+  sendBtn.onclick = send;
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") send();
+  });
+
+  addProjectBtn.onclick = () => {
+    const name = prompt("Project name?");
+    if (!name || data.projects[name]) return;
+    data.projects[name] = [];
+    data.current = name;
+    renderProjects();
+    renderChat();
+    save();
+  };
+
+  renderProjects();
+  renderChat();
 </script>
 
 </body>
