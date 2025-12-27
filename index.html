@@ -6,23 +6,111 @@
 <title>four.gb</title>
 <style>
   * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-  body {
-    margin: 0;
-    background: #0f0f0f;
-    color: white;
-    display: flex;
-    height: 100vh;
-    overflow: hidden;
-  }
+  body { margin: 0; background: #0f0f0f; color: white; display: flex; height: 100vh; overflow: hidden; }
   /* Sidebar */
-  .sidebar {
-    width: 240px;
-    background: #141414;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .sidebar { width: 240px; background: #141414; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
   .logo { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
-  .avatar { width: 80px; height: 80px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; cursor: pointe
+  .avatar { width: 80px; height: 80px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; cursor: pointer; }
+  .btn { padding: 10px; border-radius: 8px; background: #222; cursor: pointer; user-select: none; }
+  .btn.active { background: #2f6cff; }
+  .projects-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .project-item { padding: 8px; border-radius: 6px; background: #1e1e1e; cursor: pointer; }
+  .project-item.active { background: #2f6cff; }
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .topbar { padding: 10px; display: flex; justify-content: flex-end; gap: 8px; }
+  .chat { flex: 1; padding: 20px; overflow-y: auto; }
+  .message { margin-bottom: 12px; }
+  .inputbar { display: flex; padding: 10px; gap: 10px; }
+  input { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; background: #222; color: white; }
+  .send { width: 44px; height: 44px; border-radius: 50%; background: #2f6cff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+</style>
+</head>
+<body>
 
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">four.gb</div>
+  <div class="avatar">Upload<br>avatar</div>
+  <div class="btn active">💬 Chat</div>
+  <div class="btn">🖼 Images</div>
+  <div class="btn" id="clearBtn">🧹 Clear</div>
+  <div class="btn">🎤 Voice ON</div>
+  <div class="btn">👤 Profile</div>
+
+  <!-- Homework Mode -->
+  <div class="btn" id="homeworkModeBtn">📚 Homework Mode</div>
+
+  <div class="btn" id="addProjectBtn">📁 Projects</div>
+  <div class="projects-list" id="projectsList"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="btn">🔗 Share</div>
+    <div class="btn">➕ Add</div>
+    <div class="btn">🎙 Talk</div>
+  </div>
+  <div class="chat" id="chat"></div>
+  <div class="inputbar">
+    <input id="input" placeholder="Ask anything..." />
+    <div class="send" id="sendBtn">➤</div>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const sendBtn = document.getElementById("sendBtn");
+const projectsList = document.getElementById("projectsList");
+const addProjectBtn = document.getElementById("addProjectBtn");
+const homeworkModeBtn = document.getElementById("homeworkModeBtn");
+const clearBtn = document.getElementById("clearBtn");
+const avatarBtn = document.querySelector('.avatar');
+
+// --- Device detection ---
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+if (isMobile) {
+  alert("Welcome mobile user! Layout may adjust for small screens.");
+} else {
+  alert("Welcome PC user!");
+}
+
+// --- Data storage ---
+let data = JSON.parse(localStorage.getItem("fourgb")) || {
+  projects: { "Default": [] },
+  current: "Default"
+};
+let userMemory = JSON.parse(localStorage.getItem("fourgbMemory")) || {};
+
+// Homework Mode
+let homeworkMode = false;
+
+// --- Save functions ---
+function save() { localStorage.setItem("fourgb", JSON.stringify(data)); }
+function saveMemory() { localStorage.setItem("fourgbMemory", JSON.stringify(userMemory)); }
+
+// --- Render projects ---
+function renderProjects() {
+  projectsList.innerHTML = "";
+  Object.keys(data.projects).forEach(name => {
+    const div = document.createElement("div");
+    div.className = "project-item" + (name === data.current ? " active" : "");
+    div.textContent = name;
+    div.onclick = () => {
+      data.current = name;
+      renderProjects();
+      renderChat();
+      save();
+    };
+    projectsList.appendChild(div);
+  });
+}
+
+// --- Render chat ---
+function renderChat() {
+  chat.innerHTML = "";
+  data.projects[data.current].forEach(m => {
+    const div = document.createElement("div");
+    div.className = "message";
