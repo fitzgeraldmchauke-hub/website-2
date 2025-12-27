@@ -164,6 +164,15 @@
 </div>
 
 <script>
+// --- Device detection ---
+const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+if (isMobile) {
+  alert("Welcome mobile user! Layout may adjust for small screens.");
+} else {
+  alert("Welcome PC user!");
+}
+
+// --- Main elements ---
 const chat = document.getElementById("chat");
 const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
@@ -171,17 +180,21 @@ const projectsList = document.getElementById("projectsList");
 const addProjectBtn = document.getElementById("addProjectBtn");
 const homeworkModeBtn = document.getElementById("homeworkModeBtn");
 
+// --- Data storage ---
 let data = JSON.parse(localStorage.getItem("fourgb")) || {
   projects: { "Default": [] },
   current: "Default"
 };
 
+// Homework mode toggle
 let homeworkMode = false;
 
+// --- Save function ---
 function save() {
   localStorage.setItem("fourgb", JSON.stringify(data));
 }
 
+// --- Render projects list ---
 function renderProjects() {
   projectsList.innerHTML = "";
   Object.keys(data.projects).forEach(name => {
@@ -198,6 +211,7 @@ function renderProjects() {
   });
 }
 
+// --- Render chat messages ---
 function renderChat() {
   chat.innerHTML = "";
   data.projects[data.current].forEach(m => {
@@ -209,14 +223,18 @@ function renderChat() {
   chat.scrollTop = chat.scrollHeight;
 }
 
+// --- Send message ---
 function send() {
   if (!input.value.trim()) return;
   data.projects[data.current].push("You: " + input.value);
   input.value = "";
   renderChat();
   save();
+
+  // Here you could also add AI responses and memory per user
 }
 
+// --- Event listeners ---
 sendBtn.onclick = send;
 input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
@@ -235,9 +253,23 @@ homeworkModeBtn.onclick = () => {
   homeworkMode = !homeworkMode;
   homeworkModeBtn.classList.toggle("active", homeworkMode);
   alert("Homework Mode " + (homeworkMode ? "ON" : "OFF"));
-  // Here you can add AI behavior changes for homework mode
+  // AI behavior changes for homework mode go here
 };
 
+// Sidebar buttons toggle (Chat, Images, Clear, Voice, Profile)
+document.querySelectorAll('.sidebar .btn').forEach(btn => {
+  if(btn.id !== 'addProjectBtn' && btn.id !== 'homeworkModeBtn') {
+    btn.onclick = () => {
+      document.querySelectorAll('.sidebar .btn').forEach(b => {
+        if(b.id !== 'addProjectBtn' && b.id !== 'homeworkModeBtn') b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      console.log(btn.textContent + ' clicked'); // placeholder for AI actions
+    };
+  }
+});
+
+// --- Initial render ---
 renderProjects();
 renderChat();
 </script>
