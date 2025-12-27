@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>four.gb</title>
 <style>
 * { box-sizing: border-box; font-family: system-ui, sans-serif; }
@@ -10,18 +10,19 @@ body { margin: 0; background: #0f0f0f; color: white; display: flex; height: 100v
 .sidebar { width: 240px; background: #141414; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
 .logo { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
 .avatar { width: 80px; height: 80px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; cursor: pointer; }
-.btn { padding: 10px; border-radius: 8px; background: #222; cursor: pointer; user-select: none; }
+.btn { padding: 10px; border-radius: 8px; background: #222; cursor: pointer; user-select: none; text-align: center; }
 .btn.active { background: #2f6cff; }
 .projects-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .project-item { padding: 8px; border-radius: 6px; background: #1e1e1e; cursor: pointer; }
 .project-item.active { background: #2f6cff; }
 .main { flex: 1; display: flex; flex-direction: column; }
-.topbar { padding: 10px; display: flex; justify-content: flex-end; gap: 8px; }
+.topbar { padding: 10px; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 .chat { flex: 1; padding: 20px; overflow-y: auto; }
-.message { margin-bottom: 12px; }
+.message { margin-bottom: 12px; word-break: break-word; }
 .inputbar { display: flex; padding: 10px; gap: 10px; }
 input { flex: 1; padding: 12px; border-radius: 20px; border: none; outline: none; background: #222; color: white; }
 .send { width: 44px; height: 44px; border-radius: 50%; background: #2f6cff; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; }
+@media (max-width: 768px) { .sidebar { width: 60px; padding: 6px; } .logo { display: none; } .btn { padding: 6px; font-size: 12px; } }
 </style>
 </head>
 <body>
@@ -92,41 +93,4 @@ function renderChat() {
     chat.scrollTop = chat.scrollHeight;
 }
 
-function send() {
-    if (!input.value.trim()) return;
-    let message = input.value;
-    if (homeworkMode) message = "[Homework] " + message;
-    data.projects[data.current].push("You: " + message);
-    input.value = "";
-    renderChat();
-    save();
-}
-
-sendBtn.onclick = send;
-input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
-
-addProjectBtn.onclick = () => {
-    const name = prompt("Project name?");
-    if (!name || data.projects[name]) return;
-    data.projects[name] = [];
-    data.current = name;
-    renderProjects();
-    renderChat();
-    save();
-};
-
-homeworkBtn.onclick = () => {
-    homeworkMode = !homeworkMode;
-    homeworkBtn.classList.toggle("active", homeworkMode);
-    alert(homeworkMode ? "Homework mode ON" : "Homework mode OFF");
-};
-
-renderProjects();
-renderChat();
-
-// Original feature list placeholders
-const features = ['✔ Algebra','✔ Logic reasoning','✔ Full redstone circuits','✔ SAT math','✔ Grade-level memory','✔ Game logic','✔ Kid-friendly learning','🧠 memory per user','📚 homework mode','🎮 redstone simulators','🧮 algebra step-by-step visuals'];
-console.log("Features:", features);
-</script>
-</body>
-</html>
+func
