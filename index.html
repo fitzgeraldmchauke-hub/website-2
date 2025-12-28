@@ -137,9 +137,7 @@ body {
 <body>
 
 <div id="sidebar">
-  <h2 style="text-align: center; margin: 6px 0 10px;">
-    <img src="/mnt/data/A_digital_vector_logo_design_for_&quot;four.gb&quot;_feature.png" alt="four.gb Logo" style="width: 160px; display: block; margin: 0 auto;" />
-  </h2>
+  <h2>four.gb</h2>
   <button class="active" onclick="showChat()">💬 Chat</button>
   <button onclick="showImages()">🖼️ Images</button>
   <button onclick="clearChat()">🧹 Clear</button>
@@ -272,7 +270,7 @@ async function send() {
 }
 
 input.addEventListener("keydown", e => {
-  if (e.key === "Enter") send();
+  if (enter.key === "Enter") send();
 });
 </script>
 
