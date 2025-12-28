@@ -1,329 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>four.gb</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<link rel="icon" type="image/png" href="logo.png" />
-
 <style>
-*{box-sizing:border-box;font-family:system-ui,Segoe UI,Arial}
-body{
-  margin:0;
-  background:#0b0b0f;
-  color:#fff;
-  display:flex;
-  height:100vh;
-  overflow:hidden;
-}
-
-/* ===== SIDEBAR ===== */
-.sidebar{
-  width:240px;
-  background:#0f1118;
-  display:flex;
-  flex-direction:column;
-  padding:12px;
-}
-.logo-container{
-  display:flex;
-  justify-content:center;
-  margin-bottom:10px;
-  cursor:pointer;
-}
-.sidebar-logo{
-  width:110px;
-  animation:float 6s ease-in-out infinite;
-  filter:drop-shadow(0 0 14px rgba(140,100,255,.6));
-}
-@keyframes float{
-  0%{transform:translateY(0)}
-  50%{transform:translateY(-6px)}
-  100%{transform:translateY(0)}
-}
-
-.avatar{
-  width:80px;height:80px;
-  border-radius:50%;
-  background:#222;
-  margin:10px auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  overflow:hidden;
-}
-.avatar img{width:100%;height:100%;object-fit:cover}
-
-.sidebar button{
-  background:#1a1d29;
-  border:none;
-  color:white;
-  padding:10px;
-  margin:4px 0;
-  border-radius:8px;
-  text-align:left;
-  cursor:pointer;
-  font-size:15px;
-}
-.sidebar button:hover{background:#2a2e45}
-
-.projects{
-  margin-top:auto;
-}
-
-/* ===== MAIN ===== */
-.main{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-
-/* ===== TOP BAR ===== */
-.topbar{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  padding:10px;
-}
-.topbar button{
-  background:#1f2233;
-  color:white;
-  border:none;
-  padding:8px 12px;
-  border-radius:8px;
-  cursor:pointer;
-}
-
-/* ===== CHAT ===== */
-.chat{
-  flex:1;
-  padding:14px;
-  overflow-y:auto;
-}
-.msg{
-  margin:8px 0;
-}
-.user{color:#4ecbff}
-.ai{color:#b39cff}
-
-/* thinking dots */
-.dots::after{
-  content:"";
-  animation:dots 1.5s infinite;
-}
-@keyframes dots{
-  0%{content:""}
-  33%{content:"."}
-  66%{content:".."}
-  100%{content:"..."}
-}
-
-/* ===== INPUT ===== */
-.input-bar{
-  display:flex;
-  padding:10px;
-  gap:10px;
-}
-input{
-  flex:1;
-  padding:12px;
-  border-radius:10px;
-  border:none;
-  font-size:16px;
-}
-.send{
-  background:linear-gradient(135deg,#4ecbff,#6a5cff);
-  border:none;
-  color:white;
-  font-size:22px;
-  padding:0 18px;
-  border-radius:12px;
-  cursor:pointer;
-}
-
-/* ===== HOMEWORK BADGE ===== */
-.badge{
-  position:fixed;
-  top:10px;
-  right:14px;
-  background:linear-gradient(135deg,#6a5cff,#4ecbff);
-  padding:6px 14px;
-  border-radius:999px;
-  font-size:13px;
-}
-
-/* ===== SELECTOR ===== */
-.selector{
-  position:fixed;
-  inset:0;
-  background:#0b0b0f;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:999;
-}
-.selector-box{
-  background:#121524;
-  padding:30px;
-  border-radius:14px;
-  text-align:center;
-}
-.selector-box button{
-  margin:10px;
-  padding:14px 26px;
-  font-size:18px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-}
-.pc{background:#4ecbff}
-.mobile{background:#6a5cff}
+body {margin:0; font-family:system-ui,sans-serif; display:flex; height:100vh; background:#0f0f0f; color:white; overflow:hidden;}
+#sidebar {width:220px; background:#161616; padding:12px; display:flex; flex-direction:column; align-items:center;}
+#sidebar img#logo {width:150px; margin:8px 0;}
+#sidebar button {display:flex; align-items:center; gap:8px; margin:4px 0; padding:10px; border:none; border-radius:8px; background:#2a2a2a; color:white; cursor:pointer; width:90%;}
+#sidebar button.active {background:#2e6cff;}
+#sidebar button:hover {background:#444;}
+#main {flex:1; display:flex; flex-direction:column;}
+#topbar {height:48px; background:#121212; display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:0 12px;}
+#topbar button {background:#2a2a2a; border:none; border-radius:8px; color:white; padding:6px 10px; cursor:pointer;}
+#messages {flex:1; padding:12px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;}
+.msg {max-width:80%; padding:10px 14px; border-radius:14px;}
+.user {align-self:flex-end; background:#2e6cff;}
+.ai {align-self:flex-start; background:#2a2a2a;}
+.msg img {max-width:100%; border-radius:12px; margin-top:6px;}
+.typing {font-size:28px; letter-spacing:6px; animation:blink 1.4s infinite;}
+@keyframes blink {0% {opacity:.2;} 20% {opacity:1;} 100% {opacity:.2;}}
+#input-area {display:flex; gap:8px; padding:10px; background:#111;}
+#input {flex:1; padding:10px; border-radius:10px; border:none; background:#222; color:white;}
+#send {width:44px; height:44px; border-radius:50%; border:none; background:#2e6cff; color:white; font-size:18px; cursor:pointer;}
+.popup {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#1e1e1e; padding:16px; border-radius:12px; display:none; width:280px; z-index:100;}
+.popup button {width:100%; margin-top:8px;}
+#profilePic {width:70px; height:70px; border-radius:50%; background:#444; cursor:pointer; object-fit:cover; display:block; margin:8px auto;}
+#motherBtn {position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:red; display:none; cursor:pointer; z-index:200;}
+#profileRing {border:5px solid gold; border-radius:50%; display:none; width:80px; height:80px; position:absolute; top:8px; left:8px;}
 </style>
 </head>
-
 <body>
 
-<div class="selector" id="selector">
-  <div class="selector-box">
-    <h2>Choose your device</h2>
-    <button class="pc" onclick="setMode('pc')">🖥 PC</button>
-    <button class="mobile" onclick="setMode('mobile')">📱 Mobile</button>
-  </div>
+<div id="sidebar">
+<img id="logo" src="eff00d44-ef75-4ac1-a032-37a28a472844.png" title="four.gb logo">
+<img id="profilePic" src="" title="Upload avatar" onclick="uploadAvatar()">
+<div id="profileRing"></div>
+<button id="chatBtn" class="active" onclick="showChat()">💬 Chat</button>
+<button id="imgBtn" onclick="showImages()">🖼️ Images</button>
+<button onclick="clearChat()">🧹 Clear</button>
+<button id="voiceBtn" onclick="toggleVoice()">🎙️ Voice ON</button>
+<button onclick="openProfile()">👤 Profile</button>
+<button id="projectsBtn" onclick="addProject()">📁 Projects</button>
 </div>
 
-<div class="sidebar">
-  <div class="logo-container" onclick="goHome()">
-    <img src="logo.png" class="sidebar-logo">
-  </div>
-
-  <label class="avatar">
-    Upload avatar
-    <input type="file" hidden onchange="loadAvatar(event)">
-  </label>
-
-  <button>💬 Chat</button>
-  <button>🖼 Images</button>
-  <button onclick="clearChat()">🧹 Clear</button>
-  <button onclick="toggleVoice()">🎙 Voice</button>
-  <button onclick="toggleHomework()">👤 Profile</button>
-
-  <div class="projects">
-    <button onclick="addProject()">📁 Projects</button>
-  </div>
+<div id="main">
+<div id="topbar">
+<button onclick="openShare()">🔗 Share</button>
+<button onclick="openPeople()">👥 Add</button>
+<button onclick="startVoice()">🎤 Talk</button>
 </div>
 
-<div class="main">
-  <div class="topbar">
-    <button>🔗 Share</button>
-    <button>➕ Add</button>
-    <button>🗣 Talk</button>
-  </div>
+<div id="messages"></div>
 
-  <div class="chat" id="chat"></div>
-
-  <div class="input-bar">
-    <input id="input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')send()">
-    <button class="send" onclick="send()">✈</button>
-  </div>
+<div id="input-area">
+<input id="input" placeholder="Ask anything…" />
+<button id="send" onclick="send()">➤</button>
+</div>
 </div>
 
-<div class="badge" id="badge" style="display:none">🧠 Homework Mode</div>
+<div id="sharePopup" class="popup">
+<div>Link copied!</div>
+<button onclick="closePopups()">OK</button>
+</div>
+<div id="peoplePopup" class="popup">
+<div>Add people coming soon</div>
+<button onclick="closePopups()">Close</button>
+</div>
+<div id="profilePopup" class="popup">
+<div>Profile Info</div>
+<input id="usernameInput" placeholder="Username" />
+<input id="passwordInput" type="password" placeholder="Password" />
+<input id="ageInput" type="number" placeholder="Age 10-100" />
+<button onclick="login()">Login / Set</button>
+<button onclick="logout()">Logout</button>
+<button onclick="closePopups()">Close</button>
+</div>
+
+<div id="motherBtn" onclick="clickMother()">Mother</div>
 
 <script>
-let homework=false;
+let messages = document.getElementById("messages");
+let input = document.getElementById("input");
+let chatBtn = document.getElementById("chatBtn");
+let imgBtn = document.getElementById("imgBtn");
+let motherBtn = document.getElementById("motherBtn");
+let profilePic = document.getElementById("profilePic");
+let profileRing = document.getElementById("profileRing");
+let voiceBtn = document.getElementById("voiceBtn");
+let projectsBtn = document.getElementById("projectsBtn");
 
-function setMode(m){
-  localStorage.setItem("mode",m);
-  document.getElementById("selector").style.display="none";
+let voiceEnabled = true;
+let clickCount = 0;
+let username = localStorage.getItem("username")||"";
+let password = localStorage.getItem("password")||"";
+let age = parseInt(localStorage.getItem("age"))||0;
+let imageHistory = [];
+let projects = JSON.parse(localStorage.getItem("projects")||"[]");
+
+function addMessage(content, who) {
+  const div = document.createElement("div");
+  div.className = "msg "+who;
+  if(content && typeof content==="object" && content.type==="image"){
+    const img=document.createElement("img");
+    img.src=content.src;
+    div.appendChild(img);
+    imageHistory.push(content.src);
+  } else div.textContent=content;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
 }
 
-if(localStorage.getItem("mode")){
-  document.getElementById("selector").style.display="none";
+function showTyping() {
+  const d=document.createElement("div");
+  d.className="msg ai typing";
+  d.textContent="...";
+  messages.appendChild(d);
+  return d;
 }
 
-function goHome(){
-  document.getElementById("chat").innerHTML="";
+function clearChat(){messages.innerHTML="";}
+function showChat(){chatBtn.classList.add("active");imgBtn.classList.remove("active");clearChat();}
+function showImages(){imgBtn.classList.add("active");chatBtn.classList.remove("active");clearChat();imageHistory.forEach(src=>addMessage({type:"image",src},"ai"));}
+function toggleVoice(){
+  voiceEnabled = !voiceEnabled;
+  voiceBtn.textContent=`🎙️ Voice ${voiceEnabled?"ON":"OFF"}`;
+}
+function openShare(){navigator.clipboard.writeText(location.href);document.getElementById("sharePopup").style.display="block";}
+function openPeople(){document.getElementById("peoplePopup").style.display="block";}
+function openProfile(){document.getElementById("profilePopup").style.display="block";}
+function closePopups(){document.querySelectorAll(".popup").forEach(p=>p.style.display="none");}
+function uploadAvatar(){
+  if(!username){alert("Login first!");profilePic.style.display="none";setTimeout(()=>{profilePic.style.display="block";},200);}
+  else {const f=document.createElement("input");f.type="file";f.accept="image/*";f.onchange=e=>{const file=e.target.files[0];profilePic.src=URL.createObjectURL(file);};f.click();}
 }
 
-function loadAvatar(e){
-  const img=document.createElement("img");
-  img.src=URL.createObjectURL(e.target.files[0]);
-  const av=document.querySelector(".avatar");
-  av.innerHTML="";
-  av.appendChild(img);
-  setTimeout(()=>av.style.opacity=0,2000);
+function login(){
+  let u = document.getElementById("usernameInput").value.trim();
+  let p = document.getElementById("passwordInput").value.trim();
+  let a = parseInt(document.getElementById("ageInput").value);
+  if(a<10||a>100){ alert("Age must be 10-100"); return; }
+  username = u; password = p; age = a;
+  localStorage.setItem("username", u);
+  localStorage.setItem("password", p);
+  localStorage.setItem("age", a);
+  closePopups();
 }
 
-function clearChat(){
-  document.getElementById("chat").innerHTML="";
-}
+function logout(){username="";password="";age=0;localStorage.removeItem("username");localStorage.removeItem("password");localStorage.removeItem("age");}
 
-function toggleHomework(){
-  homework=!homework;
-  document.getElementById("badge").style.display=homework?"block":"none";
-}
+function clickMother(){clickCount++;if(clickCount>=100){profileRing.style.display="block";alert("Decorative ring unlocked!");clickCount=0;}}
 
 function addProject(){
-  alert("Project added (saved locally)");
+  const name = prompt("Enter project name:");
+  if(!name) return;
+  projects.push({name:name, chat:[]});
+  localStorage.setItem("projects", JSON.stringify(projects));
+  alert("Project added: "+name);
 }
 
-function toggleVoice(){
-  alert("Voice toggled (simulated)");
+async function aiResponse(text){
+  let t = text.toLowerCase();
+  if(t==="doodledog6767") return "Secret link: https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  if(/^[0-9+\-*/().\s]+$/.test(text)){try{return String(Function("return "+text)());}catch{}}
+  if(t==="hi"||t==="hello") return "Hey";
+  return "Got it.";
 }
 
-function send(){
-  const input=document.getElementById("input");
-  const text=input.value.trim();
-  if(!text)return;
-  addMsg("user",text);
-  input.value="";
-  think(text);
-}
-
-function addMsg(type,text){
-  const d=document.createElement("div");
-  d.className="msg "+type;
-  d.textContent=(type==="user"?"You: ":"AI: ")+text;
-  document.getElementById("chat").appendChild(d);
-  d.scrollIntoView();
-}
-
-function think(q){
-  const d=document.createElement("div");
-  d.className="msg ai dots";
-  d.textContent="AI is thinking";
-  document.getElementById("chat").appendChild(d);
-
-  setTimeout(()=>{
-    d.remove();
-    addMsg("ai",answer(q));
-  },3000);
-}
-
-function answer(q){
-  q=q.toLowerCase();
-
-  if(q.includes("what do you know about math")){
-    return "I know arithmetic, algebra, geometry, word problems, and how to explain math step by step.";
-  }
-  if(q.includes("bigger")){
-    return "1 billion is bigger than 900 million.";
-  }
-  if(/\d+/.test(q)){
-    try{
-      return "The answer is "+eval(q.replace("x","*"));
-    }catch{
-      return "I can help solve that step by step.";
+async function send(){
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = "";
+  addMessage(text, "user");
+  const typing = showTyping();
+  setTimeout(async()=>{
+    typing.remove();
+    const reply = await aiResponse(text);
+    addMessage(reply,"ai");
+    if(voiceEnabled && typeof reply==="string"){
+      let u=new SpeechSynthesisUtterance(reply);
+      speechSynthesis.speak(u);
     }
-  }
-  if(q.includes("confused")){
-    return "It’s okay to be confused — let’s slow down and solve it together 🙂";
-  }
-  return "I’m here to help. Ask me math, homework, or logic questions!";
+  }, 3000);
+}
+
+input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
+function startVoice(){
+  const rec=new (window.SpeechRecognition||webkitSpeechRecognition)();
+  rec.onresult=e=>{input.value=e.results[0][0].transcript; send();}
+  rec.start();
 }
 </script>
-
 </body>
 </html>
