@@ -135,7 +135,10 @@ body {
 
 <div id="sidebar">
   <h2 style="text-align: center; margin: 6px 0 10px;">
-    <img src="/mnt/data/A_digital_vector_logo_design_for_&quot;four.gb&quot;_feature.png" alt="four.gb Logo" style="width: 160px; display: block; margin: 0 auto;" />
+    <!-- Text from your uploaded Rainbow 1 image -->
+    <span style="background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet); -webkit-background-clip: text; color: transparent; font-weight: bold; font-size: 24px;">
+      four.gb
+    </span>
   </h2>
   <button class="active" onclick="showChat()">💬 Chat</button>
   <button onclick="showImages()">🖼️ Images</button>
@@ -168,7 +171,6 @@ const input = document.getElementById("input");
 let voiceEnabled = false;
 let imageHistory = JSON.parse(localStorage.getItem("images") || "[]");
 
-// spelling fixer
 const spellingMap = {
   waht:"what", biger:"bigger", bilion:"billion", milion:"million",
   percantage:"percentage", decimel:"decimal"
