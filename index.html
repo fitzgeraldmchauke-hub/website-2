@@ -1,293 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>four.gb</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<!-- Website icon -->
-<link rel="icon" type="image/png" href="/mnt/data/A_digital_vector_logo_design_for_&quot;four.gb&quot;_feature.png">
+<link rel="icon" type="image/png" href="logo.png" />
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #0f0f0f;
-  color: white;
-  display: flex;
-  height: 100vh;
+*{box-sizing:border-box;font-family:system-ui,Segoe UI,Arial}
+body{
+  margin:0;
+  background:#0b0b0f;
+  color:#fff;
+  display:flex;
+  height:100vh;
+  overflow:hidden;
 }
 
-#sidebar {
-  width: 220px;
-  background: #161616;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:240px;
+  background:#0f1118;
+  display:flex;
+  flex-direction:column;
+  padding:12px;
+}
+.logo-container{
+  display:flex;
+  justify-content:center;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+.sidebar-logo{
+  width:110px;
+  animation:float 6s ease-in-out infinite;
+  filter:drop-shadow(0 0 14px rgba(140,100,255,.6));
+}
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-6px)}
+  100%{transform:translateY(0)}
 }
 
-#sidebar h2 {
-  text-align: center;
-  margin: 6px 0 10px;
+.avatar{
+  width:80px;height:80px;
+  border-radius:50%;
+  background:#222;
+  margin:10px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  overflow:hidden;
+}
+.avatar img{width:100%;height:100%;object-fit:cover}
+
+.sidebar button{
+  background:#1a1d29;
+  border:none;
+  color:white;
+  padding:10px;
+  margin:4px 0;
+  border-radius:8px;
+  text-align:left;
+  cursor:pointer;
+  font-size:15px;
+}
+.sidebar button:hover{background:#2a2e45}
+
+.projects{
+  margin-top:auto;
 }
 
-#sidebar button {
-  background: #2a2a2a;
-  border: none;
-  border-radius: 8px;
-  padding: 10px;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  text-align: left;
+/* ===== MAIN ===== */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
 }
 
-#sidebar button:hover { background: #3a3a3a; }
-#sidebar button.active { background: #2e6cff; }
-
-#main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* ===== TOP BAR ===== */
+.topbar{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding:10px;
+}
+.topbar button{
+  background:#1f2233;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
 }
 
-#topbar {
-  height: 48px;
-  background: #121212;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 8px;
+/* ===== CHAT ===== */
+.chat{
+  flex:1;
+  padding:14px;
+  overflow-y:auto;
+}
+.msg{
+  margin:8px 0;
+}
+.user{color:#4ecbff}
+.ai{color:#b39cff}
+
+/* thinking dots */
+.dots::after{
+  content:"";
+  animation:dots 1.5s infinite;
+}
+@keyframes dots{
+  0%{content:""}
+  33%{content:"."}
+  66%{content:".."}
+  100%{content:"..."}
 }
 
-#topbar button {
-  background: #2a2a2a;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  padding: 6px 10px;
-  cursor: pointer;
+/* ===== INPUT ===== */
+.input-bar{
+  display:flex;
+  padding:10px;
+  gap:10px;
+}
+input{
+  flex:1;
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  font-size:16px;
+}
+.send{
+  background:linear-gradient(135deg,#4ecbff,#6a5cff);
+  border:none;
+  color:white;
+  font-size:22px;
+  padding:0 18px;
+  border-radius:12px;
+  cursor:pointer;
 }
 
-#messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ===== HOMEWORK BADGE ===== */
+.badge{
+  position:fixed;
+  top:10px;
+  right:14px;
+  background:linear-gradient(135deg,#6a5cff,#4ecbff);
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:13px;
 }
 
-.msg {
-  max-width: 80%;
-  padding: 10px 14px;
-  border-radius: 14px;
+/* ===== SELECTOR ===== */
+.selector{
+  position:fixed;
+  inset:0;
+  background:#0b0b0f;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
 }
-
-.user { align-self: flex-end; background: #2e6cff; }
-.ai { align-self: flex-start; background: #2a2a2a; }
-
-.typing {
-  font-size: 24px;
-  letter-spacing: 4px;
-  animation: blink 1.4s infinite;
+.selector-box{
+  background:#121524;
+  padding:30px;
+  border-radius:14px;
+  text-align:center;
 }
-
-@keyframes blink {
-  0% { opacity: .2; }
-  20% { opacity: 1; }
-  100% { opacity: .2; }
+.selector-box button{
+  margin:10px;
+  padding:14px 26px;
+  font-size:18px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
 }
-
-#input-area {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  background: #111;
-}
-
-#input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  background: #222;
-  color: white;
-  font-size: 16px;
-}
-
-#send {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: #2e6cff;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-}
+.pc{background:#4ecbff}
+.mobile{background:#6a5cff}
 </style>
 </head>
 
 <body>
 
-<div id="sidebar">
-  <h2 style="text-align: center; margin: 6px 0 10px;">
-    <!-- Rainbow text from your uploaded image -->
-    <span style="background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff); -webkit-background-clip: text; color: transparent; font-weight: bold; font-size: 24px;">
-      four.gb
-    </span>
-  </h2>
-  <button class="active" onclick="showChat()">💬 Chat</button>
-  <button onclick="showImages()">🖼️ Images</button>
-  <button onclick="showProject()">📁 Project</button>
+<div class="selector" id="selector">
+  <div class="selector-box">
+    <h2>Choose your device</h2>
+    <button class="pc" onclick="setMode('pc')">🖥 PC</button>
+    <button class="mobile" onclick="setMode('mobile')">📱 Mobile</button>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="logo-container" onclick="goHome()">
+    <img src="logo.png" class="sidebar-logo">
+  </div>
+
+  <label class="avatar">
+    Upload avatar
+    <input type="file" hidden onchange="loadAvatar(event)">
+  </label>
+
+  <button>💬 Chat</button>
+  <button>🖼 Images</button>
   <button onclick="clearChat()">🧹 Clear</button>
-  <button onclick="toggleVoice()">🎙️ Voice</button>
-  <button onclick="openProfile()">👤 Profile</button>
-</div>
+  <button onclick="toggleVoice()">🎙 Voice</button>
+  <button onclick="toggleHomework()">👤 Profile</button>
 
-<div id="main">
-  <div id="topbar">
-    <button onclick="talk()">🎤 Talk</button>
-    <button onclick="toggleDevice()">🖥️/📱</button>
-    <button onclick="share()">🔗 Share</button>
-    <button onclick="addUser()">➕ Add</button>
-  </div>
-
-  <div id="messages"></div>
-
-  <div id="input-area">
-    <input id="input" placeholder="Ask anything…" />
-    <button id="send" onclick="send()">➤</button>
+  <div class="projects">
+    <button onclick="addProject()">📁 Projects</button>
   </div>
 </div>
+
+<div class="main">
+  <div class="topbar">
+    <button>🔗 Share</button>
+    <button>➕ Add</button>
+    <button>🗣 Talk</button>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="input-bar">
+    <input id="input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')send()">
+    <button class="send" onclick="send()">✈</button>
+  </div>
+</div>
+
+<div class="badge" id="badge" style="display:none">🧠 Homework Mode</div>
 
 <script>
-const messages = document.getElementById("messages");
-const input = document.getElementById("input");
+let homework=false;
 
-let voiceEnabled = false;
-let imageHistory = JSON.parse(localStorage.getItem("images") || "[]");
-
-const spellingMap = {
-  waht:"what", biger:"bigger", bilion:"billion", milion:"million",
-  percantage:"percentage", decimel:"decimal"
-};
-
-function normalize(text) {
-  return text.split(" ").map(w => spellingMap[w.toLowerCase()] || w).join(" ");
+function setMode(m){
+  localStorage.setItem("mode",m);
+  document.getElementById("selector").style.display="none";
 }
 
-function addMessage(text, who) {
-  const div = document.createElement("div");
-  div.className = "msg " + who;
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
+if(localStorage.getItem("mode")){
+  document.getElementById("selector").style.display="none";
 }
 
-function typingDots() {
-  const d = document.createElement("div");
-  d.className = "msg ai typing";
-  d.textContent = "...";
-  messages.appendChild(d);
-  messages.scrollTop = messages.scrollHeight;
-  return d;
+function goHome(){
+  document.getElementById("chat").innerHTML="";
 }
 
-function clearChat() {
-  messages.innerHTML = "";
-  localStorage.removeItem("chat");
+function loadAvatar(e){
+  const img=document.createElement("img");
+  img.src=URL.createObjectURL(e.target.files[0]);
+  const av=document.querySelector(".avatar");
+  av.innerHTML="";
+  av.appendChild(img);
+  setTimeout(()=>av.style.opacity=0,2000);
 }
 
-function showChat() {
-  clearChat();
-  addMessage("Chat ready.", "ai");
+function clearChat(){
+  document.getElementById("chat").innerHTML="";
 }
 
-function showImages() {
-  clearChat();
-  if (!imageHistory.length) {
-    addMessage("No images yet.", "ai");
+function toggleHomework(){
+  homework=!homework;
+  document.getElementById("badge").style.display=homework?"block":"none";
+}
+
+function addProject(){
+  alert("Project added (saved locally)");
+}
+
+function toggleVoice(){
+  alert("Voice toggled (simulated)");
+}
+
+function send(){
+  const input=document.getElementById("input");
+  const text=input.value.trim();
+  if(!text)return;
+  addMsg("user",text);
+  input.value="";
+  think(text);
+}
+
+function addMsg(type,text){
+  const d=document.createElement("div");
+  d.className="msg "+type;
+  d.textContent=(type==="user"?"You: ":"AI: ")+text;
+  document.getElementById("chat").appendChild(d);
+  d.scrollIntoView();
+}
+
+function think(q){
+  const d=document.createElement("div");
+  d.className="msg ai dots";
+  d.textContent="AI is thinking";
+  document.getElementById("chat").appendChild(d);
+
+  setTimeout(()=>{
+    d.remove();
+    addMsg("ai",answer(q));
+  },3000);
+}
+
+function answer(q){
+  q=q.toLowerCase();
+
+  if(q.includes("what do you know about math")){
+    return "I know arithmetic, algebra, geometry, word problems, and how to explain math step by step.";
   }
-}
-
-function showProject() {
-  addMessage("Project view coming soon.", "ai");
-}
-
-function toggleVoice() {
-  voiceEnabled = !voiceEnabled;
-  alert("Voice " + (voiceEnabled ? "ON" : "OFF"));
-}
-
-function openProfile() {
-  alert("Profile saved locally on this device.");
-}
-
-function talk() {
-  alert("Talk function triggered!");
-}
-
-function toggleDevice() {
-  alert("Switched device view!");
-}
-
-function share() {
-  navigator.clipboard.writeText(location.href);
-  alert("Link copied!");
-}
-
-function addUser() {
-  const u = prompt("Enter username to add:");
-  if (u) alert("Added user: " + u);
-}
-
-function solveMath(text) {
-  if (/billion|million/.test(text)) {
-    const nums = text.match(/\d+/g).map(Number);
-    if (nums.length >= 2) {
-      return `${nums[0]} billion is bigger than ${nums[1]} million.`;
+  if(q.includes("bigger")){
+    return "1 billion is bigger than 900 million.";
+  }
+  if(/\d+/.test(q)){
+    try{
+      return "The answer is "+eval(q.replace("x","*"));
+    }catch{
+      return "I can help solve that step by step.";
     }
   }
-
-  if (/^[0-9+\-*/().\s]+$/.test(text)) {
-    try { return eval(text).toString(); }
-    catch {}
+  if(q.includes("confused")){
+    return "It’s okay to be confused — let’s slow down and solve it together 🙂";
   }
-  return null;
+  return "I’m here to help. Ask me math, homework, or logic questions!";
 }
-
-async function send() {
-  let text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-
-  text = normalize(text);
-  addMessage(text, "user");
-
-  const t = typingDots();
-  await new Promise(r => setTimeout(r, 3000));
-  t.remove();
-
-  let reply =
-    solveMath(text) ||
-    (text.toLowerCase().includes("what do you know about math")
-      ? "I know arithmetic, algebra, geometry, word problems, and big numbers like billions."
-      : "Got it.");
-
-  addMessage(reply, "ai");
-
-  if (voiceEnabled) {
-    speechSynthesis.speak(new SpeechSynthesisUtterance(reply));
-  }
-}
-
-input.addEventListener("keydown", e => {
-  if (e.key === "Enter") send();
-});
 </script>
 
 </body>
