@@ -1,4 +1,5 @@
 function VRSystem(scene){
-  const xrHelper = scene.createDefaultXRExperienceAsync({floorMeshes:scene.meshes});
-  xrHelper.then(helper=>console.log("VR ready"));
+  scene.createDefaultXRExperienceAsync({floorMeshes:scene.meshes})
+    .then(helper => console.log("VR ready"))
+    .catch(err => console.warn("VR not supported:", err));
 }
