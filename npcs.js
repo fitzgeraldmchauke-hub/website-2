@@ -10,6 +10,7 @@ function NPCSystem(scene){
 
   scene.onBeforeRenderObservable.add(()=>{
     npcs.forEach(n=>{
+      if(!n || !n.position) return; // safety
       n.position.x += Math.cos(n.dir)*n.speed;
       n.position.z += Math.sin(n.dir)*n.speed;
       if(Math.random()<0.01) n.dir = Math.random()*Math.PI*2;
