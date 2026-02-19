@@ -2,46 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Self-Updating Web</title>
+<title>Live Full Web Generator</title>
 <style>
-  body { font-family: sans-serif; padding: 20px; }
-  #inputBox { width: 100%; height: 150px; }
+  body { font-family: sans-serif; padding: 20px; background: #fafafa; }
+  #editor { width: 100%; height: 150px; }
+  #generateBtn { margin-top: 10px; padding: 5px 10px; }
   #notice { color: green; margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <h1>Live Full Page Generator</h1>
-<textarea id="inputBox" placeholder="Write something and it will become the website..."></textarea>
-<button id="generateBtn">Generate Web</button>
-<div id="notice">The whole page will update based on your input!</div>
+<textarea id="editor" placeholder="Type your content here..."></textarea>
+<br>
+<button id="generateBtn">Generate Full Page</button>
+<div id="notice">The whole page will be replaced with your content.</div>
 
 <script>
-const input = document.getElementById('inputBox');
+const editor = document.getElementById('editor');
+const btn = document.getElementById('generateBtn');
 
-document.getElementById('generateBtn').addEventListener('click', () => {
-  const userContent = input.value;
+btn.addEventListener('click', () => {
+  const content = editor.value;
 
-  // Build the full HTML page dynamically
+  // Build the new full HTML page
   const newHTML = `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <title>Generated Web</title>
+      <title>Generated Page</title>
       <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+        body { font-family: Arial, sans-serif; padding: 20px; background: #eef; }
         h1 { color: #333; }
+        p { font-size: 18px; }
       </style>
     </head>
     <body>
-      <h1>Your Generated Page</h1>
-      <p>${userContent}</p>
+      <h1>Your Generated Web Page</h1>
+      <p>${content}</p>
+      <button onclick="location.reload()">Go Back to Editor</button>
     </body>
     </html>
   `;
 
-  // Replace the current page with the new HTML
+  // Replace the current page with new HTML
   document.open();
   document.write(newHTML);
   document.close();
